@@ -1,11 +1,18 @@
 ---
-import Welcome from '../components/Welcome.astro';
 import Layout from '../layouts/Layout.astro';
+import HomeForms from '../components/HomeForms';
 
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
 ---
 
 <Layout>
-	<Welcome />
+  <div class="relative min-h-screen flex flex-col items-center justify-center p-4">
+    <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+      <div class="absolute -top-[40%] -left-[10%] w-[70%] h-[70%] rounded-full bg-violet-600/10 blur-[120px] mix-blend-screen"></div>
+      <div class="absolute top-[60%] -right-[10%] w-[60%] h-[60%] rounded-full bg-indigo-600/10 blur-[100px] mix-blend-screen"></div>
+    </div>
+    
+    <div class="relative z-10 w-full">
+      <HomeForms client:load />
+    </div>
+  </div>
 </Layout>
