@@ -1,38 +1,28 @@
 import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './ui/card';
-import { Input } from './ui/input';
-import { Button } from './ui/button';
-import { Users, Swords, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 
 export default function HomeForms() {
-  const [mode, setMode] = useState<'create' | 'join'>('create');
-  const [name, setName] = useState('');
+  const [hostName, setHostName] = useState('');
+  const [joinName, setJoinName] = useState('');
   const [roomCode, setRoomCode] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState<'host' | 'join' | null>(null);
   const [error, setError] = useState('');
 
-  const handleAction = async (e: React.FormEvent) => {
+  const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim()) {
+    if (!hostName.trim()) {
       setError('Please enter your name');
       return;
     }
-    if (mode === 'join' && !roomCode.trim()) {
-      setError('Please enter a room code');
-      return;
-    }
 
-    setLoading(true);
+    setLoading('host');
     setError('');
 
     try {
-      const endpoint = mode === 'create' ? '/api/create-room' : '/api/join-room';
-      const body = mode === 'create' ? { playerName: name } : { playerName: name, code: roomCode };
-
-      const res = await fetch(endpoint, {
+      const res = await fetch('/api/create-room', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
+        body: JSON.stringify({ playerName: hostName.trim() }),
       });
 
       const data = await res.json();
@@ -41,95 +31,180 @@ export default function HomeForms() {
         throw new Error(data.error || 'Something went wrong');
       }
 
-      // Save player info in session storage
       sessionStorage.setItem('treachery_player_id', data.playerId);
-      sessionStorage.setItem('treachery_player_name', name);
+      sessionStorage.setItem('treachery_player_name', hostName.trim());
 
-      // Redirect to room
       window.location.href = `/room/${data.code}`;
     } catch (err: any) {
       setError(err.message);
-      setLoading(false);
+      setLoading(null);
+    }
+  };
+
+  const handleJoin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!joinName.trim()) {
+      setError('Please enter your name');
+      return;
+    }
+    if (!roomCode.trim()) {
+      setError('Please enter a room code');
+      return;
+    }
+
+    setLoading('join');
+    setError('');
+
+    try {
+      const res = await fetch('/api/join-room', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ playerName: joinName.trim(), code: roomCode.toUpperCase() }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || 'Something went wrong');
+      }
+
+      sessionStorage.setItem('treachery_player_id', data.playerId);
+      sessionStorage.setItem('treachery_player_name', joinName.trim());
+
+      window.location.href = `/room/${data.code}`;
+    } catch (err: any) {
+      setError(err.message);
+      setLoading(null);
     }
   };
 
   return (
-    <div className="w-full max-w-md mx-auto pt-16 px-4">
+    <div className="w-full max-w-5xl mx-auto pt-16 px-4">
       <div className="text-center mb-10">
         <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-3 bg-gradient-to-br from-violet-400 to-indigo-600 bg-clip-text text-transparent drop-shadow-sm">
           Treachery MTG
         </h1>
-        <p className="text-muted-foreground text-lg">
+        <p className="text-lg text-slate-600 dark:text-slate-400">
           Hidden Roles Multiplayer Game
         </p>
       </div>
 
-      <Card className="glass border-white/10 shadow-2xl backdrop-blur-xl">
-        <CardHeader>
-          <div className="flex w-full mb-4 bg-black/20 p-1 rounded-lg">
-            <button
-              onClick={() => setMode('create')}
-              className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${mode === 'create' ? 'bg-primary text-primary-foreground shadow' : 'text-muted-foreground hover:text-white'}`}
-            >
-              Create Room
-            </button>
-            <button
-              onClick={() => setMode('join')}
-              className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${mode === 'join' ? 'bg-primary text-primary-foreground shadow' : 'text-muted-foreground hover:text-white'}`}
-            >
-              Join Room
-            </button>
-          </div>
-          <CardTitle>{mode === 'create' ? 'Start a New Game' : 'Join an Existing Game'}</CardTitle>
-          <CardDescription>
-            {mode === 'create'
-              ? 'Create a room to invite 4 magical friends.'
-              : 'Enter the 4-letter code to join.'}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleAction} className="space-y-4">
-            <div className="space-y-2">
-              <label htmlFor="name" className="text-sm font-medium leading-none">Your Name</label>
-              <Input
-                id="name"
-                placeholder="e.g. Jace Beleren"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="bg-black/20 border-white/10 focus-visible:ring-indigo-500"
-                maxLength={20}
-                required
-              />
+      {error && (
+        <div className="max-w-md mx-auto mb-8 text-center bg-red-500/10 border border-red-500/20 text-red-500 font-medium py-3 px-4 rounded-lg">
+          {error}
+        </div>
+      )}
+      {/* Grid */}
+      <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
+        {/* Host Game Section */}
+        <div className="group relative">
+          <div className="absolute -inset-0.5 bg-gradient-to-br from-primary to-blue-600 rounded-xl blur opacity-10 group-hover:opacity-30 transition duration-500"></div>
+          <div className="relative flex flex-col h-full bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl border border-white/20 dark:border-primary/20 rounded-xl p-8 shadow-2xl overflow-hidden">
+            <div className="absolute top-0 right-0 -mr-16 -mt-16 w-48 h-48 bg-primary/10 rounded-full blur-3xl"></div>
+            <div className="mb-6 flex items-center gap-4 relative z-10">
+              <div className="p-3 bg-primary rounded-lg text-white">
+                <span className="material-symbols-outlined text-3xl">crown</span>
+              </div>
+              <h2 className="text-2xl font-bold">Host a New Game</h2>
             </div>
-
-            {mode === 'join' && (
-              <div className="space-y-2">
-                <label htmlFor="roomCode" className="text-sm font-medium leading-none">Room Code</label>
-                <Input
-                  id="roomCode"
-                  placeholder="e.g. ABCD"
-                  value={roomCode}
-                  onChange={(e) => setRoomCode(e.target.value.toUpperCase())}
-                  className="bg-black/20 border-white/10 uppercase tracking-widest focus-visible:ring-indigo-500"
-                  maxLength={6}
+            <p className="text-slate-600 dark:text-slate-400 mb-8 relative z-10">
+              Ready to lead? Create a lobby and invite your friends. As the Monarch, you'll control the setup.
+            </p>
+            <form onSubmit={handleCreate} className="space-y-6 mt-auto relative z-10">
+              <div>
+                <label className="block text-sm font-semibold mb-2 ml-1 text-slate-700 dark:text-slate-300" htmlFor="host-name">Your Name</label>
+                <input
+                  className="w-full bg-white/50 dark:bg-slate-800/50 border border-slate-300 dark:border-slate-700 rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all placeholder:text-slate-400"
+                  id="host-name"
+                  placeholder="The Praetor"
+                  type="text"
+                  value={hostName}
+                  onChange={(e) => setHostName(e.target.value)}
+                  disabled={loading !== null}
+                  maxLength={20}
                   required
                 />
               </div>
-            )}
+              <button
+                type="submit"
+                disabled={loading !== null}
+                className="w-full bg-primary hover:bg-primary/90 text-white font-bold py-4 px-6 rounded-lg shadow-lg shadow-primary/20 transition-all transform hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2 group disabled:opacity-75 disabled:hover:translate-y-0"
+              >
+                {loading === 'host' ? (
+                  <Loader2 className="animate-spin h-5 w-5" />
+                ) : (
+                  <>
+                    <span>Initialize Lobby</span>
+                    <span className="material-symbols-outlined text-xl transition-transform group-hover:translate-x-1">rocket_launch</span>
+                  </>
+                )}
+              </button>
+            </form>
+          </div>
+        </div>
 
-            {error && <div className="text-destructive text-sm font-medium font-mono bg-destructive/10 p-2 rounded border border-destructive/20">{error}</div>}
-
-            <Button disabled={loading} type="submit" className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold transition-all shadow-lg hover:shadow-indigo-500/25">
-              {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : mode === 'create' ? <Swords className="mr-2 h-4 w-4" /> : <Users className="mr-2 h-4 w-4" />}
-              {mode === 'create' ? 'Create Room' : 'Join Room'}
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
-
-      <div className="mt-12 text-center text-sm text-muted-foreground/60">
-        <p>A 5-player hidden-roles experience.</p>
-        <p>1 Leader • 2 Assassins • 1 Traitor • 1 Guardian</p>
+        {/* Join Game Section */}
+        <div className="group relative">
+          <div className="absolute -inset-0.5 bg-gradient-to-br from-primary to-indigo-600 rounded-xl blur opacity-10 group-hover:opacity-30 transition duration-500"></div>
+          <div className="relative flex flex-col h-full bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl border border-white/20 dark:border-primary/20 rounded-xl p-8 shadow-2xl overflow-hidden">
+            <div className="absolute bottom-0 left-0 -ml-16 -mb-16 w-48 h-48 bg-primary/10 rounded-full blur-3xl"></div>
+            <div className="mb-6 flex items-center gap-4 relative z-10">
+              <div className="p-3 bg-primary/20 text-primary rounded-lg">
+                <span className="material-symbols-outlined text-3xl">group_add</span>
+              </div>
+              <h2 className="text-2xl font-bold">Join Existing Game</h2>
+            </div>
+            <p className="text-slate-600 dark:text-slate-400 mb-8 relative z-10">
+              Received a summons? Enter the secret room code below to join your fellow conspirators.
+            </p>
+            <form onSubmit={handleJoin} className="space-y-6 mt-auto relative z-10">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-semibold mb-2 ml-1 text-slate-700 dark:text-slate-300" htmlFor="join-name">Your Name</label>
+                  <input
+                    className="w-full bg-white/50 dark:bg-slate-800/50 border border-slate-300 dark:border-slate-700 rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all placeholder:text-slate-400"
+                    id="join-name"
+                    placeholder="Spy Master"
+                    type="text"
+                    value={joinName}
+                    onChange={(e) => setJoinName(e.target.value)}
+                    disabled={loading !== null}
+                    maxLength={20}
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold mb-2 ml-1 text-slate-700 dark:text-slate-300" htmlFor="room-code">Room Code</label>
+                  <input
+                    className="w-full bg-white/50 dark:bg-slate-800/50 border border-slate-300 dark:border-slate-700 rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all uppercase placeholder:text-slate-400"
+                    id="room-code"
+                    placeholder="TX-452"
+                    type="text"
+                    value={roomCode}
+                    onChange={(e) => setRoomCode(e.target.value.toUpperCase())}
+                    disabled={loading !== null}
+                    maxLength={6}
+                    required
+                  />
+                </div>
+              </div>
+              <button
+                type="submit"
+                disabled={loading !== null}
+                className="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold py-4 px-6 rounded-lg shadow-xl hover:bg-slate-800 dark:hover:bg-slate-100 transition-all transform hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2 group disabled:opacity-75 disabled:hover:translate-y-0"
+              >
+                {loading === 'join' ? (
+                  <Loader2 className="animate-spin h-5 w-5 dark:text-slate-900" />
+                ) : (
+                  <>
+                    <span>Join the Table</span>
+                    <span className="material-symbols-outlined text-xl transition-transform group-hover:scale-110">login</span>
+                  </>
+                )}
+              </button>
+            </form>
+          </div>
+        </div>
       </div>
     </div>
   );
