@@ -82,8 +82,8 @@ export default function HomeForms() {
           </div>
           <CardTitle>{mode === 'create' ? 'Start a New Game' : 'Join an Existing Game'}</CardTitle>
           <CardDescription>
-            {mode === 'create' 
-              ? 'Create a room to invite 4 magical friends.' 
+            {mode === 'create'
+              ? 'Create a room to invite 4 magical friends.'
               : 'Enter the 4-letter code to join.'}
           </CardDescription>
         </CardHeader>
@@ -101,7 +101,7 @@ export default function HomeForms() {
                 required
               />
             </div>
-            
+
             {mode === 'join' && (
               <div className="space-y-2">
                 <label htmlFor="roomCode" className="text-sm font-medium leading-none">Room Code</label>
@@ -126,7 +126,7 @@ export default function HomeForms() {
           </form>
         </CardContent>
       </Card>
-      
+
       <div className="mt-12 text-center text-sm text-muted-foreground/60">
         <p>A 5-player hidden-roles experience.</p>
         <p>1 Leader • 2 Assassins • 1 Traitor • 1 Guardian</p>
