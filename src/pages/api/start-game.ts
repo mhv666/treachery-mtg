@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
 import db from '../../db';
+import { gameEvents } from '../../lib/events';
 
 export const POST: APIRoute = async ({ request }) => {
   try {
@@ -46,6 +47,8 @@ export const POST: APIRoute = async ({ request }) => {
             db.prepare('UPDATE players SET role = ? WHERE id = ?').run(roles[i], playersResp[i].id);
         }
     })();
+
+    gameEvents.emit('roomUpdated', roomCode);
 
     return new Response(JSON.stringify({ success: true }), {
       status: 200,

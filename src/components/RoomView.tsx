@@ -52,21 +52,29 @@ export default function RoomView({ roomCode }: { roomCode: string }) {
   useEffect(() => {
     if (!playerId) return;
 
-    const fetchRoom = async () => {
+    const eventSource = new EventSource(`/api/room/${roomCode}/events`);
+
+    eventSource.onmessage = (event) => {
       try {
-        const res = await fetch(`/api/room/${roomCode}`);
-        const data = await res.json();
-        
-        if (!res.ok) throw new Error(data.error);
-        setRoomState(data);
-      } catch (err: any) {
-        setError(err.message);
+        const data = JSON.parse(event.data);
+        if (data.error) {
+          setError(data.error);
+        } else {
+          setRoomState(data);
+        }
+      } catch (err) {
+        console.error('Error parsing room SSE data', err);
       }
     };
 
-    fetchRoom();
-    const interval = setInterval(fetchRoom, 2000); // poll every 2 seconds
-    return () => clearInterval(interval);
+    eventSource.onerror = (err) => {
+      console.error('SSE Error', err);
+      // Wait for auto-reconnect, but if needed we can handle connection drops here.
+    };
+
+    return () => {
+      eventSource.close();
+    };
   }, [roomCode, playerId]);
 
   const handleStartGame = async () => {
