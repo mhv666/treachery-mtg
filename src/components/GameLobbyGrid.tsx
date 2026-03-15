@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Loader2 } from 'lucide-react';
 
 export default function GameLobbyGrid() {
@@ -7,6 +7,19 @@ export default function GameLobbyGrid() {
   const [roomCode, setRoomCode] = useState('');
   const [loading, setLoading] = useState<'host' | 'join' | null>(null);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      const joinCode = urlParams.get('join');
+      if (joinCode) {
+        setRoomCode(joinCode.toUpperCase());
+        setTimeout(() => {
+          document.getElementById('join-section')?.scrollIntoView({ behavior: 'smooth' });
+        }, 100);
+      }
+    }
+  }, []);
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -134,7 +147,7 @@ export default function GameLobbyGrid() {
         </div>
 
         {/* Join Game Section */}
-        <div className="group relative">
+        <div className="group relative" id="join-section">
           <div className="absolute -inset-0.5 bg-gradient-to-br from-primary to-indigo-600 rounded-xl blur opacity-10 group-hover:opacity-30 transition duration-500"></div>
           <div className="relative flex flex-col h-full bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl border border-white/20 dark:border-primary/20 rounded-xl p-8 shadow-2xl overflow-hidden">
             <div className="absolute bottom-0 left-0 -ml-16 -mb-16 w-48 h-48 bg-primary/10 rounded-full blur-3xl"></div>
