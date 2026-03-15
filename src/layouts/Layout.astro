@@ -1,7 +1,8 @@
 ---
-import Navbar from '../components/Navbar.astro';
-import Footer from '../components/Footer.astro';
+import Navbar from "../components/Navbar.astro";
+import Footer from "../components/Footer.astro";
 ---
+
 <!doctype html>
 <html lang="en" class="dark">
 	<head>
@@ -31,7 +32,9 @@ import Footer from '../components/Footer.astro';
 
 		<Navbar />
 
-		<main>
+		<main
+			class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-24"
+		>
 			<slot />
 		</main>
 		<Footer />
