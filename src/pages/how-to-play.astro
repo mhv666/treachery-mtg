@@ -1,0 +1,281 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout>
+  <div class="max-w-4xl mx-auto">
+    <div class="text-center mb-16">
+      <h1
+        class="text-4xl md:text-5xl font-bold tracking-tight mb-6 bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-primary dark:from-white dark:to-primary/80"
+      >
+        How to Play
+      </h1>
+      <p class="text-lg text-slate-600 dark:text-slate-400">
+        A complete guide to Treachery — where alliances are secret and everyone has an agenda.
+      </p>
+    </div>
+
+    <section class="mb-16">
+      <h2 class="text-2xl font-bold mb-4">Overview</h2>
+      <div class="prose prose-slate dark:prose-invert max-w-none">
+        <p class="text-slate-600 dark:text-slate-300 leading-relaxed">
+          Treachery is a social deduction game built on top of Magic: The Gathering, designed to work seamlessly with the Commander/EDH format. Think of it as a political thriller where everyone holds secrets — some players want to protect the Leader, others want them dead, and a few are playing their own hidden game entirely.
+        </p>
+        <p class="text-slate-600 dark:text-slate-300 leading-relaxed mt-4">
+          There are four possible roles to receive: <strong>Leader</strong>, <strong>Guardian</strong>, <strong>Assassin</strong>, and <strong>Traitor</strong>. Each comes with its own win condition, creating a dynamic where nobody truly knows who their allies are until the cards are on the table.
+        </p>
+      </div>
+    </section>
+
+    <section class="mb-16">
+      <h2 class="text-2xl font-bold mb-4">The Core Experience</h2>
+      <div class="prose prose-slate dark:prose-invert max-w-none">
+        <p class="text-slate-600 dark:text-slate-300 leading-relaxed">
+          If you've ever played party games like Werewolf, BANG!, or The Resistance, you'll feel right at home. The social dynamics here are completely different from a standard Magic game — alliances shift, promises get broken, and survival depends on reading your opponents correctly.
+        </p>
+        <p class="text-slate-600 dark:text-slate-300 leading-relaxed mt-4">
+          Deception is part of the game. You might claim to be a Guardian when you're actually an Assassin. You might feign suspicion of an ally to throw others off your trail. <strong>The only rule: trust no one.</strong>
+        </p>
+        <p class="text-slate-600 dark:text-slate-300 leading-relaxed mt-4">
+          Best played with <strong>5-7 players</strong>, but works with 4 or 8+ as well.
+        </p>
+      </div>
+    </section>
+
+    <section class="mb-16">
+      <h2 class="text-2xl font-bold mb-8">The Four Roles</h2>
+      <p class="text-slate-600 dark:text-slate-300 mb-8">
+        Your role is secret — except for the Leader, who must announce themselves at the start. Everything else is a matter of interpretation.
+      </p>
+
+      <div class="grid gap-6 md:grid-cols-2">
+        <div class="bg-gradient-to-br from-amber-500/10 to-amber-600/5 border border-amber-500/20 rounded-xl p-6">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-12 h-12 bg-amber-500 rounded-lg flex items-center justify-center">
+              <span class="text-2xl">👑</span>
+            </div>
+            <h3 class="text-xl font-bold">Leader</h3>
+          </div>
+          <p class="text-slate-600 dark:text-slate-300">
+            The exposed target. Wins the game alongside any Guardians, but only if they survive to the end.
+          </p>
+        </div>
+
+        <div class="bg-gradient-to-br from-blue-500/10 to-blue-600/5 border border-blue-500/20 rounded-xl p-6">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center">
+              <span class="text-2xl">🛡️</span>
+            </div>
+            <h3 class="text-xl font-bold">Guardian</h3>
+          </div>
+          <p class="text-slate-600 dark:text-slate-300">
+            The hidden protector. Shares the Leader's fate — victory if they live, defeat if they fall.
+          </p>
+        </div>
+
+        <div class="bg-gradient-to-br from-red-500/10 to-red-600/5 border border-red-500/20 rounded-xl p-6">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-12 h-12 bg-red-500 rounded-lg flex items-center justify-center">
+              <span class="text-2xl">🗡️</span>
+            </div>
+            <h3 class="text-xl font-bold">Assassin</h3>
+          </div>
+          <p class="text-slate-600 dark:text-slate-300">
+            The hunter. Victory comes the moment the Leader is eliminated from the game.
+          </p>
+        </div>
+
+        <div class="bg-gradient-to-br from-purple-500/10 to-purple-600/5 border border-purple-500/20 rounded-xl p-6">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-12 h-12 bg-purple-500 rounded-lg flex items-center justify-center">
+              <span class="text-2xl">🎭</span>
+            </div>
+            <h3 class="text-xl font-bold">Traitor</h3>
+          </div>
+          <p class="text-slate-600 dark:text-slate-300">
+            The opportunist. Must outlast everyone else — which means eliminating both Assassins and other Traitors before taking down the Leader.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="mb-16">
+      <h2 class="text-2xl font-bold mb-4">Identity Cards Explained</h2>
+      <div class="prose prose-slate dark:prose-invert max-w-none">
+        <p class="text-slate-600 dark:text-slate-300 leading-relaxed">
+          Your Identity is represented by a custom Magic card that sits in the command zone throughout the game. The card's subtype determines your role and win condition.
+        </p>
+        <p class="text-slate-600 dark:text-slate-300 leading-relaxed mt-4">
+          Most Identities have an <strong>Unveil ability</strong> — a one-time effect that triggers when you flip the card face-up. Using it changes the game dramatically, but there's a catch: everyone now knows who you are. Timing is everything.
+        </p>
+        <p class="text-slate-600 dark:text-slate-300 leading-relaxed mt-4">
+          While Identities remain face-down, all players are technically opponents to each other — making early-game politics especially chaotic.
+        </p>
+      </div>
+    </section>
+
+    <section class="mb-16">
+      <h2 class="text-2xl font-bold mb-8">Setup by Player Count</h2>
+      <p class="text-slate-600 dark:text-slate-300 mb-6">
+        Choose your Identity deck based on how many people are playing. Shuffle, deal face-down, and let everyone peek at their card in secret. The Leader immediately reveals themselves and takes the first turn.
+      </p>
+
+      <div class="overflow-x-auto">
+        <table class="w-full border-collapse">
+          <thead>
+            <tr class="border-b border-slate-200 dark:border-slate-700">
+              <th class="py-3 px-4 text-left font-semibold">Players</th>
+              <th class="py-3 px-4 text-center font-semibold">Leader</th>
+              <th class="py-3 px-4 text-center font-semibold">Traitor</th>
+              <th class="py-3 px-4 text-center font-semibold">Assassin</th>
+              <th class="py-3 px-4 text-center font-semibold">Guardian</th>
+            </tr>
+          </thead>
+          <tbody class="text-slate-600 dark:text-slate-300">
+            <tr class="border-b border-slate-100 dark:border-slate-800">
+              <td class="py-3 px-4 font-medium">4</td>
+              <td class="py-3 px-4 text-center">1</td>
+              <td class="py-3 px-4 text-center">1</td>
+              <td class="py-3 px-4 text-center">2</td>
+              <td class="py-3 px-4 text-center">-</td>
+            </tr>
+            <tr class="border-b border-slate-100 dark:border-slate-800">
+              <td class="py-3 px-4 font-medium">5</td>
+              <td class="py-3 px-4 text-center">1</td>
+              <td class="py-3 px-4 text-center">1</td>
+              <td class="py-3 px-4 text-center">2</td>
+              <td class="py-3 px-4 text-center">1</td>
+            </tr>
+            <tr class="border-b border-slate-100 dark:border-slate-800">
+              <td class="py-3 px-4 font-medium">6</td>
+              <td class="py-3 px-4 text-center">1</td>
+              <td class="py-3 px-4 text-center">1</td>
+              <td class="py-3 px-4 text-center">3</td>
+              <td class="py-3 px-4 text-center">1</td>
+            </tr>
+            <tr class="border-b border-slate-100 dark:border-slate-800">
+              <td class="py-3 px-4 font-medium">7</td>
+              <td class="py-3 px-4 text-center">1</td>
+              <td class="py-3 px-4 text-center">1</td>
+              <td class="py-3 px-4 text-center">3</td>
+              <td class="py-3 px-4 text-center">2</td>
+            </tr>
+            <tr>
+              <td class="py-3 px-4 font-medium">8</td>
+              <td class="py-3 px-4 text-center">1</td>
+              <td class="py-3 px-4 text-center">2</td>
+              <td class="py-3 px-4 text-center">3</td>
+              <td class="py-3 px-4 text-center">2</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="mb-16">
+      <h2 class="text-2xl font-bold mb-4">No Cards? No Problem</h2>
+      <div class="bg-slate-100 dark:bg-slate-800/50 rounded-xl p-6">
+        <p class="text-slate-600 dark:text-slate-300 leading-relaxed">
+          For a quick intro, you can represent roles with basic lands instead of printing Identity cards:
+        </p>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+          <div class="text-center">
+            <div class="w-16 h-20 mx-auto bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded flex items-center justify-center mb-2">
+              <span class="text-xs font-bold">Plains</span>
+            </div>
+            <span class="text-sm text-amber-600 dark:text-amber-400 font-medium">Leader</span>
+          </div>
+          <div class="text-center">
+            <div class="w-16 h-20 mx-auto bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded flex items-center justify-center mb-2">
+              <span class="text-xs font-bold">Island</span>
+            </div>
+            <span class="text-sm text-blue-600 dark:text-blue-400 font-medium">Guardian</span>
+          </div>
+          <div class="text-center">
+            <div class="w-16 h-20 mx-auto bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded flex items-center justify-center mb-2">
+              <span class="text-xs font-bold">Mountain</span>
+            </div>
+            <span class="text-sm text-red-600 dark:text-red-400 font-medium">Assassin</span>
+          </div>
+          <div class="text-center">
+            <div class="w-16 h-20 mx-auto bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded flex items-center justify-center mb-2">
+              <span class="text-xs font-bold">Swamp</span>
+            </div>
+            <span class="text-sm text-purple-600 dark:text-purple-400 font-medium">Traitor</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="mb-16">
+      <h2 class="text-2xl font-bold mb-4">Choosing Your Identities</h2>
+      <div class="prose prose-slate dark:prose-invert max-w-none">
+        <p class="text-slate-600 dark:text-slate-300 leading-relaxed">
+          Identity cards come in different rarities that reflect their complexity, not their power. All cards are balanced — but some require more strategic thinking than others.
+        </p>
+        <p class="text-slate-600 dark:text-slate-300 leading-relaxed mt-4">
+          <span class="inline-flex items-center justify-center w-6 h-6 bg-purple-500/20 rounded-full text-xs font-bold text-purple-600 dark:text-purple-400 align-middle mr-1">◆</span>
+          <strong class="text-purple-500">Special rarities</strong> are high-chaos, game-changing cards. Including or excluding them lets you tailor the experience to your group.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
+        <div class="text-center p-4">
+          <div class="w-12 h-12 mx-auto bg-slate-200 dark:bg-slate-700 rounded-full flex items-center justify-center mb-3">
+            <span class="text-xs font-bold">C</span>
+          </div>
+          <span class="text-sm font-medium">Common</span>
+          <p class="text-xs text-slate-500 mt-1">Straightforward effects</p>
+        </div>
+        <div class="text-center p-4">
+          <div class="w-12 h-12 mx-auto bg-green-500/20 rounded-full flex items-center justify-center mb-3">
+            <span class="text-xs font-bold text-green-600 dark:text-green-400">U</span>
+          </div>
+          <span class="text-sm font-medium">Uncommon</span>
+          <p class="text-xs text-slate-500 mt-1">Best for new players</p>
+        </div>
+        <div class="text-center p-4">
+          <div class="w-12 h-12 mx-auto bg-blue-500/20 rounded-full flex items-center justify-center mb-3">
+            <span class="text-xs font-bold text-blue-600 dark:text-blue-400">R</span>
+          </div>
+          <span class="text-sm font-medium">Rare</span>
+          <p class="text-xs text-slate-500 mt-1">For experienced players</p>
+        </div>
+        <div class="text-center p-4">
+          <div class="w-12 h-12 mx-auto bg-orange-500/20 rounded-full flex items-center justify-center mb-3">
+            <span class="text-xs font-bold text-orange-600 dark:text-orange-400">M</span>
+          </div>
+          <span class="text-sm font-medium">Mythic</span>
+          <p class="text-xs text-slate-500 mt-1">Expert level only</p>
+        </div>
+      </div>
+
+      <div class="mt-6 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/50 rounded-lg">
+        <p class="text-amber-800 dark:text-amber-200 text-sm">
+          <strong>Getting started:</strong> Stick to uncommon Identities for your first few games. Once everyone understands the dynamics, you can introduce rarer cards for more complex strategies.
+        </p>
+      </div>
+    </section>
+
+    <section class="mb-16">
+      <h2 class="text-2xl font-bold mb-4">Ready to Start?</h2>
+      <p class="text-slate-600 dark:text-slate-300 mb-6">
+        Browse all available Identity cards or dive into the full rulebook.
+      </p>
+      <div class="flex flex-wrap gap-4">
+        <a
+          href="/oracle"
+          class="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white font-medium rounded-lg hover:bg-primary/90 transition-colors"
+        >
+          Browse the Oracle
+        </a>
+        <a
+          href="/rules"
+          class="inline-flex items-center gap-2 px-6 py-3 bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-white font-medium rounded-lg hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors"
+        >
+          Read the Rules
+        </a>
+      </div>
+    </section>
+  </div>
+</Layout>
