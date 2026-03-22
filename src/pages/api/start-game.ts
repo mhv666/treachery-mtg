@@ -1,6 +1,8 @@
 import type { APIRoute } from 'astro';
-import sql from '../../db';
+import { db } from '../../db';
+import { rooms, players } from '../../db/schema';
 import { gameEvents } from '../../lib/events';
+import { eq } from 'drizzle-orm';
 
 export const POST: APIRoute = async ({ request }) => {
   try {
@@ -13,27 +15,27 @@ export const POST: APIRoute = async ({ request }) => {
 
     const roomCode = code.toUpperCase();
     
-    const [room] = await sql<[{ id: string, status: string }]>`
-      SELECT id, status FROM rooms WHERE code = ${roomCode}
-    `;
+    const [room] = await db.select().from(rooms).where(eq(rooms.code, roomCode));
 
     if (!room) {
       return new Response(JSON.stringify({ error: 'Room not found' }), { status: 404 });
     }
 
-    const [creator] = await sql<[{ is_creator: boolean }]>`
-      SELECT is_creator FROM players WHERE id = ${playerId} AND room_id = ${room.id}
-    `;
+    const [creator] = await db
+      .select({ isCreator: players.isCreator })
+      .from(players)
+      .where(eq(players.id, playerId));
     
-    if (!creator || creator.is_creator !== true) {
+    if (!creator || creator.isCreator !== true) {
         return new Response(JSON.stringify({ error: 'Only the creator can start the game' }), { status: 403 });
     }
 
-    const playersResp = await sql<[{id: string}]>`
-      SELECT id FROM players WHERE room_id = ${room.id}
-    `;
+    const roomPlayers = await db
+      .select({ id: players.id })
+      .from(players)
+      .where(eq(players.roomId, room.id));
     
-    if (playersResp.length !== 5) {
+    if (roomPlayers.length !== 5) {
       return new Response(JSON.stringify({ error: 'Need exactly 5 players to start' }), { status: 400 });
     }
 
@@ -43,11 +45,11 @@ export const POST: APIRoute = async ({ request }) => {
         [roles[i], roles[j]] = [roles[j], roles[i]];
     }
 
-    await sql.begin(async (tx) => {
-        await tx`UPDATE rooms SET status = 'started' WHERE id = ${room.id}`;
+    await db.transaction(async (tx) => {
+        await tx.update(rooms).set({ status: 'started' }).where(eq(rooms.id, room.id));
         
         for (let i = 0; i < 5; i++) {
-            await tx`UPDATE players SET role = ${roles[i]} WHERE id = ${playersResp[i].id}`;
+            await tx.update(players).set({ role: roles[i] }).where(eq(players.id, roomPlayers[i].id));
         }
     });
 

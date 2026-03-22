@@ -1,6 +1,8 @@
 import type { APIRoute } from 'astro';
-import sql from '../../../../db';
+import { db } from '../../../../db';
+import { rooms, players } from '../../../../db/schema';
 import { gameEvents } from '../../../../lib/events';
+import { eq } from 'drizzle-orm';
 
 export const GET: APIRoute = async ({ params, request }) => {
   const code = params.code?.toUpperCase();
@@ -15,21 +17,25 @@ export const GET: APIRoute = async ({ params, request }) => {
 
       const sendUpdate = async () => {
         try {
-          const [room] = await sql<[{ id: string, status: string }]>`
-            SELECT id, status FROM rooms WHERE code = ${code}
-          `;
+          const [room] = await db.select().from(rooms).where(eq(rooms.code, code));
           if (!room) return;
 
-          const players = await sql<[{id: string, name: string, is_creator: boolean, role: string | null}]>`
-            SELECT id, name, is_creator, role FROM players WHERE room_id = ${room.id}
-          `;
+          const roomPlayers = await db
+            .select({
+              id: players.id,
+              name: players.name,
+              isCreator: players.isCreator,
+              role: players.role,
+            })
+            .from(players)
+            .where(eq(players.roomId, room.id));
 
           const data = {
             status: room.status,
-            players: players.map(p => ({
+            players: roomPlayers.map(p => ({
                 id: p.id,
                 name: p.name,
-                isCreator: p.is_creator,
+                isCreator: p.isCreator,
                 role: undefined 
             }))
           };

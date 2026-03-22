@@ -1,6 +1,8 @@
 import type { APIRoute } from 'astro';
-import sql from '../../db';
+import { db } from '../../db';
+import { rooms, players } from '../../db/schema';
 import { gameEvents } from '../../lib/events';
+import { eq } from 'drizzle-orm';
 
 export const POST: APIRoute = async ({ request }) => {
   try {
@@ -20,9 +22,9 @@ export const POST: APIRoute = async ({ request }) => {
     const roomId = crypto.randomUUID();
     const playerId = crypto.randomUUID();
 
-    await sql.begin(async (tx) => {
-        await tx`INSERT INTO rooms (id, code, status) VALUES (${roomId}, ${code}, 'waiting')`;
-        await tx`INSERT INTO players (id, room_id, name, is_creator) VALUES (${playerId}, ${roomId}, ${playerName}, true)`;
+    await db.transaction(async (tx) => {
+        await tx.insert(rooms).values({ id: roomId, code, status: 'waiting' });
+        await tx.insert(players).values({ id: playerId, roomId, name: playerName, isCreator: true });
     });
 
     gameEvents.emit('roomUpdated', code);

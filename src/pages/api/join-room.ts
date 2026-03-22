@@ -1,6 +1,8 @@
 import type { APIRoute } from 'astro';
-import sql from '../../db';
+import { db } from '../../db';
+import { rooms, players } from '../../db/schema';
 import { gameEvents } from '../../lib/events';
+import { eq, sql, count } from 'drizzle-orm';
 
 export const POST: APIRoute = async ({ request }) => {
   try {
@@ -13,9 +15,7 @@ export const POST: APIRoute = async ({ request }) => {
 
     const roomCode = code.toUpperCase();
     
-    const [room] = await sql<[{ id: string, status: string }]>`
-      SELECT id, status FROM rooms WHERE code = ${roomCode}
-    `;
+    const [room] = await db.select().from(rooms).where(eq(rooms.code, roomCode));
 
     if (!room) {
       return new Response(JSON.stringify({ error: 'Room not found' }), { status: 404 });
@@ -25,23 +25,31 @@ export const POST: APIRoute = async ({ request }) => {
       return new Response(JSON.stringify({ error: 'Game has already started' }), { status: 400 });
     }
 
-    const [playersResp] = await sql<[{ count: bigint }]>`
-      SELECT count(*) as count FROM players WHERE room_id = ${room.id}
-    `;
+    const playerCountResult = await db
+      .select({ count: count() })
+      .from(players)
+      .where(eq(players.roomId, room.id));
     
-    if (Number(playersResp.count) >= 5) {
+    if (playerCountResult[0].count >= 5) {
       return new Response(JSON.stringify({ error: 'Room is full (max 5 players)' }), { status: 400 });
     }
 
-    const [existingPlayer] = await sql`
-      SELECT id FROM players WHERE room_id = ${room.id} AND name = ${playerName}
-    `;
-    if (existingPlayer) {
+    const [existingPlayer] = await db
+      .select()
+      .from(players)
+      .where(eq(players.roomId, room.id));
+
+    const existingPlayerCheck = await db
+      .select()
+      .from(players)
+      .where(sql`${players.roomId} = ${room.id} AND ${players.name} = ${playerName}`);
+
+    if (existingPlayerCheck.length > 0) {
       return new Response(JSON.stringify({ error: 'Name already taken in this room' }), { status: 400 });
     }
 
     const playerId = crypto.randomUUID();
-    await sql`INSERT INTO players (id, room_id, name, is_creator) VALUES (${playerId}, ${room.id}, ${playerName}, false)`;
+    await db.insert(players).values({ id: playerId, roomId: room.id, name: playerName, isCreator: false });
 
     gameEvents.emit('roomUpdated', roomCode);
 
