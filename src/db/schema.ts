@@ -4,6 +4,7 @@ export const rooms = pgTable('rooms', {
   id: text('id').primaryKey(),
   code: text('code').unique().notNull(),
   status: text('status').notNull().default('waiting'),
+  gamePhase: text('game_phase').notNull().default('waiting'),
   createdAt: timestamp('created_at').defaultNow(),
 });
 
@@ -14,6 +15,13 @@ export const players = pgTable('players', {
   role: text('role'),
   isCreator: boolean('is_creator').default(false),
   joinedAt: timestamp('joined_at').defaultNow(),
+});
+
+export const playerCards = pgTable('player_cards', {
+  id: serial('id').primaryKey(),
+  playerId: text('player_id').notNull().references(() => players.id, { onDelete: 'cascade' }),
+  cardId: integer('card_id').notNull().references(() => cards.id, { onDelete: 'cascade' }),
+  dealtAt: timestamp('dealt_at').defaultNow(),
 });
 
 export const cards = pgTable('cards', {

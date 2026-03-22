@@ -3,16 +3,34 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Button } from './ui/button';
 import { Loader2, Users, Play, Crown, Shield, Skull } from 'lucide-react';
 import QRCode from 'qrcode';
+import CountdownView from './CountdownView';
+import { MIN_PLAYERS, MAX_PLAYERS, roleIcons, roleColors, roleDescriptions, type Role } from '../lib/game';
+
+interface CardData {
+  id: number;
+  name: string;
+  uri: string;
+  subtype: string | null;
+  type: string;
+  text: string;
+  flavor: string;
+  artist: string;
+  rarity: string;
+  cost: string;
+  color: string;
+}
 
 interface Player {
   id: string;
   name: string;
   isCreator: boolean;
   role?: string;
+  card: CardData | null;
 }
 
 interface RoomState {
   status: string;
+  gamePhase: string;
   players: Player[];
 }
 
@@ -23,7 +41,6 @@ export default function RoomView({ roomCode }: { roomCode: string }) {
   const [playerName, setPlayerName] = useState<string | null>(null);
   const [qrCodeUrl, setQrCodeUrl] = useState<string>('');
   
-  // Actually, we can get the join URL by appending the code
   const joinUrl = typeof window !== 'undefined' ? `${window.location.origin}/?join=${roomCode}` : '';
 
   useEffect(() => {
@@ -36,12 +53,11 @@ export default function RoomView({ roomCode }: { roomCode: string }) {
     setPlayerId(id);
     setPlayerName(name);
 
-    // Generate QR code
     if (joinUrl) {
       QRCode.toDataURL(joinUrl, {
         color: {
           dark: '#ffffff',
-          light: '#00000000' // transparent background
+          light: '#00000000'
         },
         margin: 1,
         width: 200
@@ -69,7 +85,6 @@ export default function RoomView({ roomCode }: { roomCode: string }) {
 
     eventSource.onerror = (err) => {
       console.error('SSE Error', err);
-      // Wait for auto-reconnect, but if needed we can handle connection drops here.
     };
 
     return () => {
@@ -79,7 +94,7 @@ export default function RoomView({ roomCode }: { roomCode: string }) {
 
   const handleStartGame = async () => {
     try {
-      const res = await fetch('/api/start-game', {
+      const res = await fetch('/api/start-countdown', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ code: roomCode, playerId })
@@ -118,39 +133,55 @@ export default function RoomView({ roomCode }: { roomCode: string }) {
 
   const currentPlayer = roomState.players.find(p => p.id === playerId);
   const isCreator = currentPlayer?.isCreator;
-  const isStarted = roomState.status === 'started';
+  const playerCount = roomState.players.length;
+  const canStart = playerCount >= MIN_PLAYERS && playerCount <= MAX_PLAYERS;
+  const isCountdown = roomState.gamePhase === 'countdown';
+  const isStarted = roomState.status === 'started' || roomState.gamePhase === 'started';
 
-  const roleIcons: Record<string, React.ReactNode> = {
-    'Leader': <Crown className="h-12 w-12 text-yellow-500 mb-4" />,
-    'Guardian': <Shield className="h-12 w-12 text-blue-500 mb-4" />,
-    'Assassin': <span className="text-5xl mb-4 leading-none">🗡️</span>,
-    'Traitor': <Skull className="h-12 w-12 text-zinc-400 mb-4" />
-  };
-
-  const roleDescriptions: Record<string, string> = {
-    'Leader': 'You must discover and eliminate the Assassins and the Traitor. Survive at all costs. You begin the game revealed.',
-    'Guardian': 'Your objective is to protect the Leader at all costs. You win if the Leader wins.',
-    'Assassin': 'Your objective is to kill the Leader. You win if the Leader dies.',
-    'Traitor': 'Your objective is to be the last player standing. Eliminate the Assassins and the Guardian first, then kill the Leader.'
-  };
+  if (isCountdown) {
+    return (
+      <CountdownView 
+        roomCode={roomCode} 
+        roomState={roomState} 
+        playerId={playerId} 
+      />
+    );
+  }
 
   if (isStarted && currentPlayer?.role) {
+    const role = currentPlayer.role as Role;
+    const card = currentPlayer.card;
+
     return (
       <div className="flex flex-col items-center justify-center min-h-[80vh] w-full max-w-lg mx-auto px-4">
         <Card className="glass border-white/20 w-full overflow-hidden relative">
           <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-violet-500 via-fuchsia-500 to-indigo-500"></div>
           <CardHeader className="text-center pt-10">
             <div className="flex justify-center flex-col items-center">
-                {roleIcons[currentPlayer.role] || <Users className="h-12 w-12 text-primary mb-4" />}
+                {roleIcons[role] && (
+                  <span className="text-5xl mb-2">
+                    {roleIcons[role]}
+                  </span>
+                )}
                 <CardTitle className="text-4xl uppercase tracking-widest font-black bg-gradient-to-br from-white to-white/60 bg-clip-text text-transparent">
-                  {currentPlayer.role}
+                  {role}
                 </CardTitle>
             </div>
           </CardHeader>
           <CardContent className="text-center pt-6 pb-10">
             <p className="text-lg text-muted-foreground leading-relaxed px-4">
-              {roleDescriptions[currentPlayer.role]}
+              {roleDescriptions[role]}
             </p>
+            {card && (
+              <div className="mt-6">
+                <img 
+                  src={card.uri} 
+                  alt={card.name}
+                  className="w-48 h-64 object-cover rounded-lg mx-auto shadow-2xl"
+                />
+                <p className="text-sm text-muted-foreground mt-2">{card.name}</p>
+              </div>
+            )}
           </CardContent>
           <CardFooter className="bg-black/20 border-t border-white/5 py-3">
             <p className="text-xs text-center w-full text-muted-foreground uppercase tracking-widest">
@@ -162,12 +193,10 @@ export default function RoomView({ roomCode }: { roomCode: string }) {
     );
   }
 
-  // Waiting Room View
   return (
     <div className="w-full max-w-3xl mx-auto pt-10 px-4">
       <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
         
-        {/* Left Column: Room Info */}
         <div className="md:col-span-5 space-y-6">
             <Card className="glass border-primary/30 relative overflow-hidden backdrop-blur-md">
               <div className="absolute top-0 right-0 w-32 h-32 bg-primary/20 rounded-full blur-3xl -mr-16 -mt-16"></div>
@@ -193,11 +222,11 @@ export default function RoomView({ roomCode }: { roomCode: string }) {
               <Button 
                 size="lg"
                 className="w-full h-14 text-lg font-bold shadow-xl shadow-primary/20"
-                disabled={roomState.players.length !== 5}
+                disabled={!canStart}
                 onClick={handleStartGame}
               >
                 <Play className="mr-2 h-5 w-5" fill="currentColor" />
-                {roomState.players.length === 5 ? 'Start Game' : `Waiting (${roomState.players.length}/5)`}
+                {canStart ? 'Start Game' : `Waiting (${playerCount}/${MIN_PLAYERS})`}
               </Button>
             )}
             
@@ -211,7 +240,6 @@ export default function RoomView({ roomCode }: { roomCode: string }) {
             )}
         </div>
 
-        {/* Right Column: Players */}
         <div className="md:col-span-7">
           <Card className="glass shadow-xl h-full border-white/10">
             <CardHeader>
@@ -221,7 +249,7 @@ export default function RoomView({ roomCode }: { roomCode: string }) {
                   Joined Players
                 </CardTitle>
                 <span className="bg-primary/20 text-indigo-300 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
-                  {roomState.players.length} / 5
+                  {playerCount} / {MAX_PLAYERS}
                 </span>
               </div>
             </CardHeader>
@@ -247,14 +275,18 @@ export default function RoomView({ roomCode }: { roomCode: string }) {
                   </li>
                 ))}
                 
-                {/* Empty slots */}
-                {Array.from({ length: 5 - roomState.players.length }).map((_, i) => (
+                {Array.from({ length: Math.max(0, MIN_PLAYERS - playerCount) }).map((_, i) => (
                   <li key={`empty-${i}`} className="flex items-center space-x-4 p-4 rounded-lg bg-black/10 border border-dashed border-white/10 opacity-50">
                      <div className="flex-shrink-0 w-10 h-10 rounded-full bg-black/20 flex items-center justify-center"></div>
                      <p className="font-medium text-muted-foreground italic">Waiting for player...</p>
                   </li>
                 ))}
               </ul>
+              {playerCount > MIN_PLAYERS && (
+                <p className="text-xs text-muted-foreground mt-4 text-center">
+                  {playerCount} players in game. Roles will be assigned based on player count.
+                </p>
+              )}
             </CardContent>
           </Card>
         </div>
