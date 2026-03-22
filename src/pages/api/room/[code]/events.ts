@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro';
-import db from '../../../../db';
+import sql from '../../../../db';
 import { gameEvents } from '../../../../lib/events';
 
 export const GET: APIRoute = async ({ params, request }) => {
@@ -13,19 +13,23 @@ export const GET: APIRoute = async ({ params, request }) => {
     start(controller) {
       const encoder = new TextEncoder();
 
-      const sendUpdate = () => {
+      const sendUpdate = async () => {
         try {
-          const room = db.prepare('SELECT id, status FROM rooms WHERE code = ?').get(code) as { id: string, status: string } | undefined;
+          const [room] = await sql<[{ id: string, status: string }]>`
+            SELECT id, status FROM rooms WHERE code = ${code}
+          `;
           if (!room) return;
 
-          const players = db.prepare('SELECT id, name, is_creator, role FROM players WHERE room_id = ?').all(room.id) as Array<{id: string, name: string, is_creator: number, role: string|null}>;
+          const players = await sql<[{id: string, name: string, is_creator: boolean, role: string | null}]>`
+            SELECT id, name, is_creator, role FROM players WHERE room_id = ${room.id}
+          `;
 
           const data = {
             status: room.status,
             players: players.map(p => ({
                 id: p.id,
                 name: p.name,
-                isCreator: p.is_creator === 1,
+                isCreator: p.is_creator,
                 role: undefined 
             }))
           };
@@ -44,10 +48,8 @@ export const GET: APIRoute = async ({ params, request }) => {
 
       gameEvents.on('roomUpdated', handleUpdate);
 
-      // Initial push
       sendUpdate();
 
-      // Keep alive
       const interval = setInterval(() => {
         try {
           controller.enqueue(encoder.encode(`:\n\n`));

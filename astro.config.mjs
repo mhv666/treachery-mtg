@@ -14,7 +14,7 @@ export default defineConfig({
   vite: {
     plugins: [tailwindcss()],
     ssr: {
-      external: ['better-sqlite3']
+      external: ['postgres']
     }
   },
   integrations: [react()]

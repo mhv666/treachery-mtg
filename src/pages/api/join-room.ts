@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro';
-import db from '../../db';
+import sql from '../../db';
 import { gameEvents } from '../../lib/events';
 
 export const POST: APIRoute = async ({ request }) => {
@@ -13,7 +13,9 @@ export const POST: APIRoute = async ({ request }) => {
 
     const roomCode = code.toUpperCase();
     
-    const room = db.prepare('SELECT id, status FROM rooms WHERE code = ?').get(roomCode) as { id: string, status: string } | undefined;
+    const [room] = await sql<[{ id: string, status: string }]>`
+      SELECT id, status FROM rooms WHERE code = ${roomCode}
+    `;
 
     if (!room) {
       return new Response(JSON.stringify({ error: 'Room not found' }), { status: 404 });
@@ -23,20 +25,23 @@ export const POST: APIRoute = async ({ request }) => {
       return new Response(JSON.stringify({ error: 'Game has already started' }), { status: 400 });
     }
 
-    const playersResp = db.prepare('SELECT count(*) as count FROM players WHERE room_id = ?').get(room.id) as { count: number };
+    const [playersResp] = await sql<[{ count: bigint }]>`
+      SELECT count(*) as count FROM players WHERE room_id = ${room.id}
+    `;
     
-    if (playersResp.count >= 5) {
+    if (Number(playersResp.count) >= 5) {
       return new Response(JSON.stringify({ error: 'Room is full (max 5 players)' }), { status: 400 });
     }
 
-    // Check if player name already exists in room
-    const existingPlayer = db.prepare('SELECT id FROM players WHERE room_id = ? AND name = ?').get(room.id, playerName);
+    const [existingPlayer] = await sql`
+      SELECT id FROM players WHERE room_id = ${room.id} AND name = ${playerName}
+    `;
     if (existingPlayer) {
       return new Response(JSON.stringify({ error: 'Name already taken in this room' }), { status: 400 });
     }
 
     const playerId = crypto.randomUUID();
-    db.prepare('INSERT INTO players (id, room_id, name, is_creator) VALUES (?, ?, ?, ?)').run(playerId, room.id, playerName, 0);
+    await sql`INSERT INTO players (id, room_id, name, is_creator) VALUES (${playerId}, ${room.id}, ${playerName}, false)`;
 
     gameEvents.emit('roomUpdated', roomCode);
 

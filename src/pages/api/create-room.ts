@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro';
-import db from '../../db';
+import sql from '../../db';
 import { gameEvents } from '../../lib/events';
 
 export const POST: APIRoute = async ({ request }) => {
@@ -11,22 +11,19 @@ export const POST: APIRoute = async ({ request }) => {
       return new Response(JSON.stringify({ error: 'Player name is required' }), { status: 400 });
     }
 
-    // Generate a simple 4 letter room code
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     let code = '';
     for (let i = 0; i < 4; i++) {
         code += chars.charAt(Math.floor(Math.random() * chars.length));
     }
     
-    // In a real app we'd verify the code is unique, but 4 letters is enough for this
-    
     const roomId = crypto.randomUUID();
     const playerId = crypto.randomUUID();
 
-    db.transaction(() => {
-        db.prepare('INSERT INTO rooms (id, code, status) VALUES (?, ?, ?)').run(roomId, code, 'waiting');
-        db.prepare('INSERT INTO players (id, room_id, name, is_creator) VALUES (?, ?, ?, ?)').run(playerId, roomId, playerName, 1);
-    })();
+    await sql.begin(async (tx) => {
+        await tx`INSERT INTO rooms (id, code, status) VALUES (${roomId}, ${code}, 'waiting')`;
+        await tx`INSERT INTO players (id, room_id, name, is_creator) VALUES (${playerId}, ${roomId}, ${playerName}, true)`;
+    });
 
     gameEvents.emit('roomUpdated', code);
 

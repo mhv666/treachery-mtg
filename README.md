@@ -1,46 +1,82 @@
-# Astro Starter Kit: Basics
+# Treachery MTG
 
-```sh
-pnpm create astro@latest -- --template basics
+A multiplayer card game web app built with Astro and PostgreSQL.
+
+## Prerequisites
+
+- Node.js >= 22.12.0
+- PostgreSQL database
+- pnpm
+
+## Database Setup
+
+### Option 1: Docker (Recommended)
+
+```bash
+docker run -d \
+  --name treachery-db \
+  -p 5432:5432 \
+  -e POSTGRES_USER=postgres \
+  -e POSTGRES_PASSWORD=secret \
+  -e POSTGRES_DB=treachery \
+  postgres:18-alpine
 ```
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+### Option 2: Local PostgreSQL
 
-## 🚀 Project Structure
+Create a database named `treachery` on your local PostgreSQL instance.
 
-Inside of your Astro project, you'll see the following folders and files:
+## Environment Configuration
 
-```text
+Copy the example environment file and configure your database connection:
+
+```bash
+cp .env.example .env
+```
+
+Edit `.env` and set your `DATABASE_URL`:
+
+```
+DATABASE_URL=postgres://postgres:secret@localhost:5432/treachery
+```
+
+Replace the connection string with your actual PostgreSQL credentials:
+- `postgres` - database user
+- `secret` - database password
+- `localhost:5432` - host and port
+- `treachery` - database name
+
+## Installation & Running
+
+```bash
+# Install dependencies
+pnpm install
+
+# Start development server
+pnpm dev
+```
+
+The app will be available at `http://localhost:4321`.
+
+## Commands
+
+| Command | Action |
+| :------ | :----- |
+| `pnpm install` | Installs dependencies |
+| `pnpm dev` | Starts dev server at `localhost:4321` |
+| `pnpm build` | Builds for production to `./dist/` |
+| `pnpm preview` | Previews production build locally |
+
+## Project Structure
+
+```
 /
-├── public/
-│   └── favicon.svg
-├── src
-│   ├── assets
-│   │   └── astro.svg
-│   ├── components
-│   │   └── Welcome.astro
-│   ├── layouts
-│   │   └── Layout.astro
-│   └── pages
-│       └── index.astro
-└── package.json
+├── src/
+│   ├── components/     # UI components
+│   ├── db/             # Database connection
+│   ├── layouts/        # Page layouts
+│   ├── lib/            # Utilities and events
+│   └── pages/          # Routes and API endpoints
+├── public/             # Static assets
+└── .env.example        # Environment variables template
 ```
-
-To learn more about the folder structure of an Astro project, refer to [our guide on project structure](https://docs.astro.build/en/basics/project-structure/).
-
-## 🧞 Commands
-
-All commands are run from the root of the project, from a terminal:
-
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `pnpm install`             | Installs dependencies                            |
-| `pnpm dev`             | Starts local dev server at `localhost:4321`      |
-| `pnpm build`           | Build your production site to `./dist/`          |
-| `pnpm preview`         | Preview your build locally, before deploying     |
-| `pnpm astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `pnpm astro -- --help` | Get help using the Astro CLI                     |
-
-## 👀 Want to learn more?
-
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).

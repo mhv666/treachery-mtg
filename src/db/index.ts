@@ -1,29 +1,30 @@
-import Database from 'better-sqlite3';
+import postgres from 'postgres';
 
-const db = new Database('treachery.db', { verbose: console.log });
+const sql = postgres(process.env.DATABASE_URL || 'postgres://postgres:secret@localhost:5432/treachery');
 
-// Initialize database schema
-export function initDB() {
-  db.exec(`
+export async function initDB() {
+  await sql`
     CREATE TABLE IF NOT EXISTS rooms (
       id TEXT PRIMARY KEY,
       code TEXT UNIQUE NOT NULL,
       status TEXT NOT NULL DEFAULT 'waiting', 
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    );
+      created_at TIMESTAMP DEFAULT NOW()
+    )
+  `;
 
+  await sql`
     CREATE TABLE IF NOT EXISTS players (
       id TEXT PRIMARY KEY,
       room_id TEXT NOT NULL,
       name TEXT NOT NULL,
       role TEXT,
-      is_creator BOOLEAN DEFAULT 0,
-      joined_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      is_creator BOOLEAN DEFAULT false,
+      joined_at TIMESTAMP DEFAULT NOW(),
       FOREIGN KEY (room_id) REFERENCES rooms(id) ON DELETE CASCADE
-    );
-  `);
+    )
+  `;
 }
 
 initDB();
 
-export default db;
+export default sql;
