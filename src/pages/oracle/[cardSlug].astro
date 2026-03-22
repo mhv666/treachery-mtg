@@ -1,0 +1,108 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { db } from "../../db";
+import { cards } from "../../db/schema";
+import { eq } from "drizzle-orm";
+import { Crown, Shield, Skull, ArrowLeft } from "lucide-react";
+import { parseManaSymbols } from "../../lib/mana";
+
+const { cardSlug } = Astro.params;
+
+const [card] = await db.select().from(cards).where(eq(cards.nameAnchor, cardSlug || ""));
+
+if (!card) {
+  return Astro.redirect("/oracle");
+}
+
+const roleColors: Record<string, { from: string; to: string; border: string; bg: string }> = {
+  Leader: { from: "from-amber-500", to: "to-amber-600", border: "border-amber-500/50", bg: "bg-amber-500" },
+  Guardian: { from: "from-blue-500", to: "to-blue-600", border: "border-blue-500/50", bg: "bg-blue-500" },
+  Assassin: { from: "from-red-500", to: "to-red-600", border: "border-red-500/50", bg: "bg-red-500" },
+  Traitor: { from: "from-purple-500", to: "to-purple-600", border: "border-purple-500/50", bg: "bg-purple-500" },
+};
+
+const role = card.subtype || "Leader";
+const colors = roleColors[role] || roleColors.Leader;
+
+const rarityColors: Record<string, string> = {
+  C: "bg-slate-200 dark:bg-slate-700",
+  U: "bg-green-500/30",
+  R: "bg-blue-500/30",
+  M: "bg-orange-500/30",
+};
+
+const rarityNames: Record<string, string> = {
+  C: "Common",
+  U: "Uncommon",
+  R: "Rare",
+  M: "Mythic",
+};
+
+const typeLine = [card.supertype, card.type, card.subtype].filter(Boolean).join(" ");
+const parsedText = parseManaSymbols(card.text);
+const parsedFlavor = card.flavor ? parseManaSymbols(card.flavor) : "";
+const parsedCost = card.cost ? parseManaSymbols(card.cost) : "";
+---
+
+<Layout>
+  <div class="max-w-2xl mx-auto">
+    <a
+      href="/oracle"
+      class="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-primary dark:text-slate-400 dark:hover:text-primary mb-8 transition-colors"
+    >
+      <ArrowLeft class="h-4 w-4" />
+      Back to Oracle
+    </a>
+
+    <div class={`rounded-xl overflow-hidden border-2 ${colors.border} shadow-2xl`}>
+      <div class={`bg-gradient-to-r ${colors.from} ${colors.to} px-6 py-4 flex justify-between items-center`}>
+        <h1 class="text-2xl font-bold text-white tracking-wide">{card.name}</h1>
+        {parsedCost && (
+          <span class="text-white/90 text-lg" set:html={parsedCost} />
+        )}
+      </div>
+
+      <div class="bg-slate-100 dark:bg-slate-800 px-6 py-2 border-b border-slate-200 dark:border-slate-700">
+        <p class="text-sm font-medium text-slate-700 dark:text-slate-300">
+          {typeLine}
+        </p>
+      </div>
+
+      <div class={`h-64 bg-gradient-to-br ${colors.from}/20 ${colors.to}/10 flex items-center justify-center`}>
+        {role === "Assassin" ? (
+          <span class="text-8xl">🗡️</span>
+        ) : role === "Leader" ? (
+          <Crown class={`h-32 w-32 ${colors.bg.replace('bg-', 'text-')}`} />
+        ) : role === "Guardian" ? (
+          <Shield class={`h-32 w-32 ${colors.bg.replace('bg-', 'text-')}`} />
+        ) : (
+          <Skull class={`h-32 w-32 ${colors.bg.replace('bg-', 'text-')}`} />
+        )}
+      </div>
+
+      <div class="bg-amber-50 dark:bg-amber-950/20 px-6 py-5 border-t border-slate-200 dark:border-slate-700">
+        <p class="text-slate-800 dark:text-slate-200 leading-relaxed whitespace-pre-wrap" set:html={parsedText} />
+        {parsedFlavor && (
+          <p class="text-slate-500 dark:text-slate-400 italic mt-4 leading-relaxed whitespace-pre-wrap" set:html={parsedFlavor} />
+        )}
+      </div>
+
+      <div class="bg-slate-200 dark:bg-slate-800 px-6 py-3 flex justify-between items-center text-xs text-slate-500 dark:text-slate-400">
+        <span>Illustrated by {card.artist}</span>
+        <div class="flex items-center gap-3">
+          <span>Set: {card.setCode}</span>
+          <span class={`inline-flex items-center justify-center w-6 h-6 rounded ${rarityColors[card.rarity] || rarityColors.C} font-bold text-slate-700 dark:text-slate-200`}>
+            {card.rarity}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-6 flex justify-center">
+      <span class={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium ${colors.bg} text-white`}>
+        {role === "Assassin" ? "🗡️" : role === "Leader" ? "👑" : role === "Guardian" ? "🛡️" : "💀"}
+        {rarityNames[card.rarity]} {role}
+      </span>
+    </div>
+  </div>
+</Layout>
