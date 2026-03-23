@@ -4,6 +4,7 @@ import tseslint from 'typescript-eslint';
 import reactHooks from 'eslint-plugin-react-hooks';
 import react from 'eslint-plugin-react';
 import astro from 'eslint-plugin-astro';
+import eslintConfigPrettier from 'eslint-config-prettier';
 
 export default [
   {
@@ -45,4 +46,5 @@ export default [
       },
     },
   },
+  eslintConfigPrettier,
 ];
