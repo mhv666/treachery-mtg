@@ -1,21 +1,21 @@
 // @ts-check
-import { defineConfig } from 'astro/config';
+import { defineConfig } from "astro/config";
 
-import node from '@astrojs/node';
-import react from '@astrojs/react';
-import tailwindcss from '@tailwindcss/vite';
+import node from "@astrojs/node";
+import react from "@astrojs/react";
+import tailwindcss from "@tailwindcss/vite";
 
 // https://astro.build/config
 export default defineConfig({
-  output: 'server',
+  output: "server",
   adapter: node({
-    mode: 'standalone',
+    mode: "standalone",
   }),
   vite: {
     plugins: [tailwindcss()],
     ssr: {
-      external: ['postgres']
-    }
+      external: ["postgres"],
+    },
   },
-  integrations: [react()]
+  integrations: [react()],
 });

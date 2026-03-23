@@ -41,6 +41,7 @@ DATABASE_URL=postgres://postgres:secret@localhost:5432/treachery
 ```
 
 Replace the connection string with your actual PostgreSQL credentials:
+
 - `postgres` - database user
 - `secret` - database password
 - `localhost:5432` - host and port
@@ -60,12 +61,12 @@ The app will be available at `http://localhost:4321`.
 
 ## Commands
 
-| Command | Action |
-| :------ | :----- |
-| `pnpm install` | Installs dependencies |
-| `pnpm dev` | Starts dev server at `localhost:4321` |
-| `pnpm build` | Builds for production to `./dist/` |
-| `pnpm preview` | Previews production build locally |
+| Command        | Action                                |
+| :------------- | :------------------------------------ |
+| `pnpm install` | Installs dependencies                 |
+| `pnpm dev`     | Starts dev server at `localhost:4321` |
+| `pnpm build`   | Builds for production to `./dist/`    |
+| `pnpm preview` | Previews production build locally     |
 
 ## Project Structure
 

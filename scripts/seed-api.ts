@@ -1,6 +1,8 @@
-import postgres from 'postgres';
+import postgres from "postgres";
 
-const DATABASE_URL = process.env.DATABASE_URL || 'postgres://postgres:secret@localhost:5432/treachery';
+const DATABASE_URL =
+  process.env.DATABASE_URL ||
+  "postgres://postgres:secret@localhost:5432/treachery";
 const sql = postgres(DATABASE_URL);
 
 async function fetchWithRetry(url: string, retries = 3): Promise<any> {
@@ -11,23 +13,25 @@ async function fetchWithRetry(url: string, retries = 3): Promise<any> {
       return await response.json();
     } catch (error) {
       if (i === retries - 1) throw error;
-      await new Promise(r => setTimeout(r, 1000));
+      await new Promise((r) => setTimeout(r, 1000));
     }
   }
 }
 
 async function seed() {
   try {
-    console.log('Fetching card data from API...');
-    const data = await fetchWithRetry('https://mtgtreachery.net/rules/oracle/treachery-cards.json');
+    console.log("Fetching card data from API...");
+    const data = await fetchWithRetry(
+      "https://mtgtreachery.net/rules/oracle/treachery-cards.json",
+    );
     console.log(`Fetched ${data.cards_count} cards`);
 
-    console.log('Clearing existing data...');
+    console.log("Clearing existing data...");
     await sql`DELETE FROM rulings`;
     await sql`DELETE FROM cards`;
-    console.log('Cleared existing data');
+    console.log("Cleared existing data");
 
-    console.log('Inserting cards...');
+    console.log("Inserting cards...");
     let inserted = 0;
     for (const card of data.cards) {
       await sql`
@@ -37,7 +41,7 @@ async function seed() {
           ${card.name},
           ${card.name_anchor},
           ${card.uri},
-          ${card.cost || ''},
+          ${card.cost || ""},
           ${card.cmc || 0},
           ${card.color},
           ${card.type},
@@ -45,9 +49,9 @@ async function seed() {
           ${card.types?.subtype || null},
           ${card.rarity},
           ${card.text},
-          ${card.flavor || ''},
+          ${card.flavor || ""},
           ${card.artist},
-          ${card.set_code || 'TRD-2025'}
+          ${card.set_code || "TRD-2025"}
         )
       `;
       inserted++;
@@ -55,7 +59,7 @@ async function seed() {
     }
     console.log(`Inserted ${inserted} cards`);
 
-    console.log('Inserting rulings...');
+    console.log("Inserting rulings...");
     let rulingsInserted = 0;
     for (const card of data.cards) {
       if (card.rulings && Array.isArray(card.rulings)) {
@@ -67,9 +71,9 @@ async function seed() {
     }
     console.log(`Inserted ${rulingsInserted} rulings`);
 
-    console.log('Seed completed successfully!');
+    console.log("Seed completed successfully!");
   } catch (error) {
-    console.error('Seed failed:', error);
+    console.error("Seed failed:", error);
     process.exit(1);
   } finally {
     await sql.end();

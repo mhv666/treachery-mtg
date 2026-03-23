@@ -1,10 +1,24 @@
-import React, { useEffect, useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from './ui/card';
-import { Button } from './ui/button';
-import { Loader2, Users, Play, Crown, Shield, Skull } from 'lucide-react';
-import QRCode from 'qrcode';
-import CountdownView from './CountdownView';
-import { MIN_PLAYERS, MAX_PLAYERS, roleIcons, roleColors, roleDescriptions, type Role } from '../lib/game';
+import React, { useEffect, useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  CardFooter,
+} from "./ui/card";
+import { Button } from "./ui/button";
+import { Loader2, Users, Play, Crown, Shield, Skull } from "lucide-react";
+import QRCode from "qrcode";
+import CountdownView from "./CountdownView";
+import {
+  MIN_PLAYERS,
+  MAX_PLAYERS,
+  roleIcons,
+  roleColors,
+  roleDescriptions,
+  type Role,
+} from "../lib/game";
 
 interface CardData {
   id: number;
@@ -36,16 +50,19 @@ interface RoomState {
 
 export default function RoomView({ roomCode }: { roomCode: string }) {
   const [roomState, setRoomState] = useState<RoomState | null>(null);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [playerId, setPlayerId] = useState<string | null>(null);
   const [playerName, setPlayerName] = useState<string | null>(null);
-  const [qrCodeUrl, setQrCodeUrl] = useState<string>('');
-  
-  const joinUrl = typeof window !== 'undefined' ? `${window.location.origin}/?join=${roomCode}` : '';
+  const [qrCodeUrl, setQrCodeUrl] = useState<string>("");
+
+  const joinUrl =
+    typeof window !== "undefined"
+      ? `${window.location.origin}/?join=${roomCode}`
+      : "";
 
   useEffect(() => {
-    const id = sessionStorage.getItem('treachery_player_id');
-    const name = sessionStorage.getItem('treachery_player_name');
+    const id = sessionStorage.getItem("treachery_player_id");
+    const name = sessionStorage.getItem("treachery_player_name");
     if (!id || !name) {
       window.location.href = `/?join=${roomCode}`;
       return;
@@ -56,12 +73,14 @@ export default function RoomView({ roomCode }: { roomCode: string }) {
     if (joinUrl) {
       QRCode.toDataURL(joinUrl, {
         color: {
-          dark: '#ffffff',
-          light: '#00000000'
+          dark: "#ffffff",
+          light: "#00000000",
         },
         margin: 1,
-        width: 200
-      }).then(url => setQrCodeUrl(url)).catch(err => console.error(err));
+        width: 200,
+      })
+        .then((url) => setQrCodeUrl(url))
+        .catch((err) => console.error(err));
     }
   }, [roomCode, joinUrl]);
 
@@ -79,12 +98,12 @@ export default function RoomView({ roomCode }: { roomCode: string }) {
           setRoomState(data);
         }
       } catch (err) {
-        console.error('Error parsing room SSE data', err);
+        console.error("Error parsing room SSE data", err);
       }
     };
 
     eventSource.onerror = (err) => {
-      console.error('SSE Error', err);
+      console.error("SSE Error", err);
     };
 
     return () => {
@@ -94,28 +113,33 @@ export default function RoomView({ roomCode }: { roomCode: string }) {
 
   const handleStartGame = async () => {
     try {
-      const res = await fetch('/api/start-countdown', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code: roomCode, playerId })
+      const res = await fetch("/api/start-countdown", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: roomCode, playerId }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
     } catch (err: any) {
-        alert(err.message);
+      alert(err.message);
     }
   };
 
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen">
+      <div className="flex min-h-screen flex-col items-center justify-center">
         <Card className="glass border-destructive/50">
           <CardHeader>
             <CardTitle className="text-destructive">Error</CardTitle>
             <CardDescription>{error}</CardDescription>
           </CardHeader>
           <CardFooter>
-            <Button onClick={() => window.location.href = '/'} variant="outline">Back to Home</Button>
+            <Button
+              onClick={() => (window.location.href = "/")}
+              variant="outline"
+            >
+              Back to Home
+            </Button>
           </CardFooter>
         </Card>
       </div>
@@ -124,26 +148,29 @@ export default function RoomView({ roomCode }: { roomCode: string }) {
 
   if (!roomState || !playerId) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh]">
-        <Loader2 className="h-12 w-12 animate-spin text-primary" />
-        <p className="mt-4 text-muted-foreground animate-pulse">Connecting to room...</p>
+      <div className="flex min-h-[60vh] flex-col items-center justify-center">
+        <Loader2 className="text-primary h-12 w-12 animate-spin" />
+        <p className="text-muted-foreground mt-4 animate-pulse">
+          Connecting to room...
+        </p>
       </div>
     );
   }
 
-  const currentPlayer = roomState.players.find(p => p.id === playerId);
+  const currentPlayer = roomState.players.find((p) => p.id === playerId);
   const isCreator = currentPlayer?.isCreator;
   const playerCount = roomState.players.length;
   const canStart = playerCount >= MIN_PLAYERS && playerCount <= MAX_PLAYERS;
-  const isCountdown = roomState.gamePhase === 'countdown';
-  const isStarted = roomState.status === 'started' || roomState.gamePhase === 'started';
+  const isCountdown = roomState.gamePhase === "countdown";
+  const isStarted =
+    roomState.status === "started" || roomState.gamePhase === "started";
 
   if (isCountdown) {
     return (
-      <CountdownView 
-        roomCode={roomCode} 
-        roomState={roomState} 
-        playerId={playerId} 
+      <CountdownView
+        roomCode={roomCode}
+        roomState={roomState}
+        playerId={playerId}
       />
     );
   }
@@ -153,39 +180,41 @@ export default function RoomView({ roomCode }: { roomCode: string }) {
     const card = currentPlayer.card;
 
     return (
-      <div className="flex flex-col items-center justify-center min-h-[80vh] w-full max-w-lg mx-auto px-4">
-        <Card className="glass border-white/20 w-full overflow-hidden relative">
-          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-violet-500 via-fuchsia-500 to-indigo-500"></div>
-          <CardHeader className="text-center pt-10">
-            <div className="flex justify-center flex-col items-center">
-                {roleIcons[role] && (
-                  <span className="text-5xl mb-2">
-                    {roleIcons[role]}
-                  </span>
-                )}
-                <CardTitle className="text-4xl uppercase tracking-widest font-black bg-gradient-to-br from-white to-white/60 bg-clip-text text-transparent">
-                  {role}
-                </CardTitle>
+      <div className="mx-auto flex min-h-[80vh] w-full max-w-lg flex-col items-center justify-center px-4">
+        <Card className="glass relative w-full overflow-hidden border-white/20">
+          <div className="absolute top-0 left-0 h-1 w-full bg-gradient-to-r from-violet-500 via-fuchsia-500 to-indigo-500"></div>
+          <CardHeader className="pt-10 text-center">
+            <div className="flex flex-col items-center justify-center">
+              {roleIcons[role] && (
+                <span className="mb-2 text-5xl">{roleIcons[role]}</span>
+              )}
+              <CardTitle className="bg-gradient-to-br from-white to-white/60 bg-clip-text text-4xl font-black tracking-widest text-transparent uppercase">
+                {role}
+              </CardTitle>
             </div>
           </CardHeader>
-          <CardContent className="text-center pt-6 pb-10">
-            <p className="text-lg text-muted-foreground leading-relaxed px-4">
+          <CardContent className="pt-6 pb-10 text-center">
+            <p className="text-muted-foreground px-4 text-lg leading-relaxed">
               {roleDescriptions[role]}
             </p>
             {card && (
               <div className="mt-6">
-                <img 
-                  src={card.uri} 
+                <img
+                  src={card.uri}
                   alt={card.name}
-                  className="w-48 h-64 object-cover rounded-lg mx-auto shadow-2xl"
+                  className="mx-auto h-64 w-48 rounded-lg object-cover shadow-2xl"
                 />
-                <p className="text-sm text-muted-foreground mt-2">{card.name}</p>
-                <p className="text-xs text-muted-foreground mt-2 italic px-4">{card.text}</p>
+                <p className="text-muted-foreground mt-2 text-sm">
+                  {card.name}
+                </p>
+                <p className="text-muted-foreground mt-2 px-4 text-xs italic">
+                  {card.text}
+                </p>
               </div>
             )}
           </CardContent>
-          <CardFooter className="bg-black/20 border-t border-white/5 py-3">
-            <p className="text-xs text-center w-full text-muted-foreground uppercase tracking-widest">
+          <CardFooter className="border-t border-white/5 bg-black/20 py-3">
+            <p className="text-muted-foreground w-full text-center text-xs tracking-widest uppercase">
               Keep this role secret
             </p>
           </CardFooter>
@@ -195,61 +224,72 @@ export default function RoomView({ roomCode }: { roomCode: string }) {
   }
 
   return (
-    <div className="w-full max-w-3xl mx-auto pt-10 px-4">
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
-        
-        <div className="md:col-span-5 space-y-6">
-            <Card className="glass border-primary/30 relative overflow-hidden backdrop-blur-md">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-primary/20 rounded-full blur-3xl -mr-16 -mt-16"></div>
-              <CardHeader>
-                <CardDescription className="text-primary/80 font-medium uppercase tracking-wider text-xs">Room Code</CardDescription>
-                <CardTitle className="text-6xl font-black tracking-widest">{roomCode}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {qrCodeUrl ? (
-                  <div className="bg-white/5 backdrop-blur-lg p-4 rounded-xl inline-block border border-white/10 mt-2">
-                    <img src={qrCodeUrl} alt="Join QR Code" className="w-40 h-40 mix-blend-screen opacity-90" />
-                  </div>
-                ) : (
-                  <div className="w-40 h-40 bg-white/5 animate-pulse rounded-xl mt-2"></div>
-                )}
-                <p className="text-sm text-muted-foreground mt-4">
-                  Scan to join or enter the code on the homepage.
+    <div className="mx-auto w-full max-w-3xl px-4 pt-10">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-12">
+        <div className="space-y-6 md:col-span-5">
+          <Card className="glass border-primary/30 relative overflow-hidden backdrop-blur-md">
+            <div className="bg-primary/20 absolute top-0 right-0 -mt-16 -mr-16 h-32 w-32 rounded-full blur-3xl"></div>
+            <CardHeader>
+              <CardDescription className="text-primary/80 text-xs font-medium tracking-wider uppercase">
+                Room Code
+              </CardDescription>
+              <CardTitle className="text-6xl font-black tracking-widest">
+                {roomCode}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {qrCodeUrl ? (
+                <div className="mt-2 inline-block rounded-xl border border-white/10 bg-white/5 p-4 backdrop-blur-lg">
+                  <img
+                    src={qrCodeUrl}
+                    alt="Join QR Code"
+                    className="h-40 w-40 opacity-90 mix-blend-screen"
+                  />
+                </div>
+              ) : (
+                <div className="mt-2 h-40 w-40 animate-pulse rounded-xl bg-white/5"></div>
+              )}
+              <p className="text-muted-foreground mt-4 text-sm">
+                Scan to join or enter the code on the homepage.
+              </p>
+            </CardContent>
+          </Card>
+
+          {isCreator && (
+            <Button
+              size="lg"
+              className="shadow-primary/20 h-14 w-full text-lg font-bold shadow-xl"
+              disabled={!canStart}
+              onClick={handleStartGame}
+            >
+              <Play className="mr-2 h-5 w-5" fill="currentColor" />
+              {canStart
+                ? "Start Game"
+                : `Waiting (${playerCount}/${MIN_PLAYERS})`}
+            </Button>
+          )}
+
+          {!isCreator && (
+            <Card className="glass border-white/5">
+              <CardContent className="p-6 text-center">
+                <Loader2 className="text-primary mx-auto mb-3 h-6 w-6 animate-spin" />
+                <p className="text-muted-foreground text-sm">
+                  Waiting for the creator to start the game...
                 </p>
               </CardContent>
             </Card>
-
-            {isCreator && (
-              <Button 
-                size="lg"
-                className="w-full h-14 text-lg font-bold shadow-xl shadow-primary/20"
-                disabled={!canStart}
-                onClick={handleStartGame}
-              >
-                <Play className="mr-2 h-5 w-5" fill="currentColor" />
-                {canStart ? 'Start Game' : `Waiting (${playerCount}/${MIN_PLAYERS})`}
-              </Button>
-            )}
-            
-            {!isCreator && (
-              <Card className="glass border-white/5">
-                <CardContent className="p-6 text-center">
-                  <Loader2 className="h-6 w-6 animate-spin mx-auto text-primary mb-3" />
-                  <p className="text-sm text-muted-foreground">Waiting for the creator to start the game...</p>
-                </CardContent>
-              </Card>
-            )}
+          )}
         </div>
 
         <div className="md:col-span-7">
-          <Card className="glass shadow-xl h-full border-white/10">
+          <Card className="glass h-full border-white/10 shadow-xl">
             <CardHeader>
-              <div className="flex justify-between items-center">
+              <div className="flex items-center justify-between">
                 <CardTitle className="flex items-center text-xl">
                   <Users className="mr-3 h-5 w-5 text-indigo-400" />
                   Joined Players
                 </CardTitle>
-                <span className="bg-primary/20 text-indigo-300 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+                <span className="bg-primary/20 rounded-full px-3 py-1 text-xs font-bold tracking-wider text-indigo-300 uppercase">
                   {playerCount} / {MAX_PLAYERS}
                 </span>
               </div>
@@ -257,41 +297,56 @@ export default function RoomView({ roomCode }: { roomCode: string }) {
             <CardContent>
               <ul className="space-y-3">
                 {roomState.players.map((p, idx) => (
-                  <li key={p.id} className={`flex items-center justify-between p-4 rounded-lg bg-black/20 border border-white/5 transition-all ${p.id === playerId ? 'ring-1 ring-primary/50 bg-primary/10' : ''}`}>
+                  <li
+                    key={p.id}
+                    className={`flex items-center justify-between rounded-lg border border-white/5 bg-black/20 p-4 transition-all ${p.id === playerId ? "ring-primary/50 bg-primary/10 ring-1" : ""}`}
+                  >
                     <div className="flex items-center space-x-4">
-                      <div className="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500/20 to-purple-500/20 flex items-center justify-center border border-white/10 font-bold text-lg text-indigo-300">
+                      <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full border border-white/10 bg-gradient-to-br from-indigo-500/20 to-purple-500/20 text-lg font-bold text-indigo-300">
                         {idx + 1}
                       </div>
                       <div>
-                        <p className="font-semibold text-white text-lg">
-                          {p.name} {p.id === playerId && <span className="text-xs ml-2 text-indigo-400 font-normal">(You)</span>}
+                        <p className="text-lg font-semibold text-white">
+                          {p.name}{" "}
+                          {p.id === playerId && (
+                            <span className="ml-2 text-xs font-normal text-indigo-400">
+                              (You)
+                            </span>
+                          )}
                         </p>
                       </div>
                     </div>
                     {p.isCreator && (
-                      <div className="bg-amber-500/20 text-amber-300 text-xs px-2 py-1 rounded border border-amber-500/20 font-medium">
+                      <div className="rounded border border-amber-500/20 bg-amber-500/20 px-2 py-1 text-xs font-medium text-amber-300">
                         Host
                       </div>
                     )}
                   </li>
                 ))}
-                
-                {Array.from({ length: Math.max(0, MIN_PLAYERS - playerCount) }).map((_, i) => (
-                  <li key={`empty-${i}`} className="flex items-center space-x-4 p-4 rounded-lg bg-black/10 border border-dashed border-white/10 opacity-50">
-                     <div className="flex-shrink-0 w-10 h-10 rounded-full bg-black/20 flex items-center justify-center"></div>
-                     <p className="font-medium text-muted-foreground italic">Waiting for player...</p>
+
+                {Array.from({
+                  length: Math.max(0, MIN_PLAYERS - playerCount),
+                }).map((_, i) => (
+                  <li
+                    key={`empty-${i}`}
+                    className="flex items-center space-x-4 rounded-lg border border-dashed border-white/10 bg-black/10 p-4 opacity-50"
+                  >
+                    <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-black/20"></div>
+                    <p className="text-muted-foreground font-medium italic">
+                      Waiting for player...
+                    </p>
                   </li>
                 ))}
               </ul>
               {playerCount > MIN_PLAYERS && (
-                <p className="text-xs text-muted-foreground mt-4 text-center">
-                  {playerCount} players in game. Roles will be assigned based on player count.
+                <p className="text-muted-foreground mt-4 text-center text-xs">
+                  {playerCount} players in game. Roles will be assigned based on
+                  player count.
                 </p>
               )}
             </CardContent>
           </Card>
         </div>
-
       </div>
     </div>
   );

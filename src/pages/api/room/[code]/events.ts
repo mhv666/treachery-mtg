@@ -1,14 +1,14 @@
-import type { APIRoute } from 'astro';
-import { db } from '../../../../db';
-import { rooms, players, cards, playerCards } from '../../../../db/schema';
-import { gameEvents } from '../../../../lib/events';
-import { eq } from 'drizzle-orm';
+import type { APIRoute } from "astro";
+import { db } from "../../../../db";
+import { rooms, players, cards, playerCards } from "../../../../db/schema";
+import { gameEvents } from "../../../../lib/events";
+import { eq } from "drizzle-orm";
 
 export const GET: APIRoute = async ({ params, request }) => {
   const code = params.code?.toUpperCase();
 
   if (!code) {
-    return new Response('Room code is required', { status: 400 });
+    return new Response("Room code is required", { status: 400 });
   }
 
   const stream = new ReadableStream({
@@ -17,7 +17,10 @@ export const GET: APIRoute = async ({ params, request }) => {
 
       const sendUpdate = async () => {
         try {
-          const [room] = await db.select().from(rooms).where(eq(rooms.code, code));
+          const [room] = await db
+            .select()
+            .from(rooms)
+            .where(eq(rooms.code, code));
           if (!room) return;
 
           const roomPlayers = await db
@@ -54,29 +57,32 @@ export const GET: APIRoute = async ({ params, request }) => {
                 name: p.name,
                 isCreator: p.isCreator,
                 role: p.role,
-                card: card ? {
-                  id: card.id,
-                  name: card.name,
-                  uri: card.uri,
-                  subtype: card.subtype,
-                  type: card.type,
-                  text: card.text,
-                  flavor: card.flavor,
-                  artist: card.artist,
-                  rarity: card.rarity,
-                  cost: card.cost,
-                  color: card.color,
-                } : null,
+                card: card
+                  ? {
+                      id: card.id,
+                      name: card.name,
+                      uri: card.uri,
+                      subtype: card.subtype,
+                      type: card.type,
+                      text: card.text,
+                      flavor: card.flavor,
+                      artist: card.artist,
+                      rarity: card.rarity,
+                      cost: card.cost,
+                      color: card.color,
+                    }
+                  : null,
               };
-            })
+            }),
           );
 
-          const shouldRevealRoles = room.gamePhase === 'started' || room.status === 'started';
+          const shouldRevealRoles =
+            room.gamePhase === "started" || room.status === "started";
 
           const data = {
             status: room.status,
             gamePhase: room.gamePhase,
-            players: playersWithCards.map(p => ({
+            players: playersWithCards.map((p) => ({
               id: p.id,
               name: p.name,
               isCreator: p.isCreator,
@@ -85,9 +91,11 @@ export const GET: APIRoute = async ({ params, request }) => {
             })),
           };
 
-          controller.enqueue(encoder.encode(`data: ${JSON.stringify(data)}\n\n`));
+          controller.enqueue(
+            encoder.encode(`data: ${JSON.stringify(data)}\n\n`),
+          );
         } catch (e) {
-          console.error('Error fetching room state for SSE', e);
+          console.error("Error fetching room state for SSE", e);
         }
       };
 
@@ -97,7 +105,7 @@ export const GET: APIRoute = async ({ params, request }) => {
         }
       };
 
-      gameEvents.on('roomUpdated', handleUpdate);
+      gameEvents.on("roomUpdated", handleUpdate);
 
       sendUpdate();
 
@@ -109,19 +117,23 @@ export const GET: APIRoute = async ({ params, request }) => {
         }
       }, 15000);
 
-      request.signal.addEventListener('abort', () => {
-        gameEvents.off('roomUpdated', handleUpdate);
+      request.signal.addEventListener("abort", () => {
+        gameEvents.off("roomUpdated", handleUpdate);
         clearInterval(interval);
-        try { controller.close(); } catch { /* stream already closed */ }
+        try {
+          controller.close();
+        } catch {
+          /* stream already closed */
+        }
       });
-    }
+    },
   });
 
   return new Response(stream, {
     headers: {
-      'Content-Type': 'text/event-stream',
-      'Cache-Control': 'no-cache',
-      'Connection': 'keep-alive',
-    }
+      "Content-Type": "text/event-stream",
+      "Cache-Control": "no-cache",
+      Connection: "keep-alive",
+    },
   });
 };

@@ -5,53 +5,58 @@ import Footer from "../components/Footer.astro";
 
 <!doctype html>
 <html lang="en" class="dark">
-	<head>
-		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Treachery MTG Game</title>
-		<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
-		<link href="//cdn.jsdelivr.net/npm/mana-font@latest/css/mana.min.css" rel="stylesheet" type="text/css" />
-	</head>
-	<body
-		class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen selection:bg-primary selection:text-white"
-	>
-		<div class="fixed inset-0 -z-10 overflow-hidden">
-			<div
-				class="absolute inset-0 bg-background-light dark:bg-background-dark"
-			>
-			</div>
-			<div
-				class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-primary/20 blur-[120px]"
-			>
-			</div>
-			<div
-				class="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-primary/10 blur-[150px]"
-			>
-			</div>
-		</div>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="generator" content={Astro.generator} />
+    <title>Treachery MTG Game</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined"
+      rel="stylesheet"
+    />
+    <link
+      href="//cdn.jsdelivr.net/npm/mana-font@latest/css/mana.min.css"
+      rel="stylesheet"
+      type="text/css"
+    />
+  </head>
+  <body
+    class="bg-background-light dark:bg-background-dark font-display selection:bg-primary min-h-screen text-slate-900 selection:text-white dark:text-slate-100"
+  >
+    <div class="fixed inset-0 -z-10 overflow-hidden">
+      <div class="bg-background-light dark:bg-background-dark absolute inset-0">
+      </div>
+      <div
+        class="bg-primary/20 absolute top-[-10%] left-[-10%] h-[40%] w-[40%] rounded-full blur-[120px]"
+      >
+      </div>
+      <div
+        class="bg-primary/10 absolute right-[-10%] bottom-[-10%] h-[50%] w-[50%] rounded-full blur-[150px]"
+      >
+      </div>
+    </div>
 
-		<Navbar />
+    <Navbar />
 
-		<main
-			class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-24"
-		>
-			<slot />
-		</main>
-		<Footer />
-	</body>
+    <main
+      class="relative z-10 mx-auto max-w-7xl px-4 pt-12 pb-24 sm:px-6 lg:px-8"
+    >
+      <slot />
+    </main>
+    <Footer />
+  </body>
 </html>
 
 <style>
-	html,
-	body {
-		margin: 0;
-		width: 100%;
-		height: 100%;
-	}
+  html,
+  body {
+    margin: 0;
+    width: 100%;
+    height: 100%;
+  }
 </style>
 <script>
-	import "../styles/globals.css";
-	import "../styles/mana.css";
+  import "../styles/globals.css";
+  import "../styles/mana.css";
 </script>

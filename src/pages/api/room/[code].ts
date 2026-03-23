@@ -1,20 +1,24 @@
-import type { APIRoute } from 'astro';
-import { db } from '../../../db';
-import { rooms, players, cards, playerCards } from '../../../db/schema';
-import { eq } from 'drizzle-orm';
+import type { APIRoute } from "astro";
+import { db } from "../../../db";
+import { rooms, players, cards, playerCards } from "../../../db/schema";
+import { eq } from "drizzle-orm";
 
 export const GET: APIRoute = async ({ params }) => {
   try {
     const code = params.code?.toUpperCase();
 
     if (!code) {
-      return new Response(JSON.stringify({ error: 'Room code is required' }), { status: 400 });
+      return new Response(JSON.stringify({ error: "Room code is required" }), {
+        status: 400,
+      });
     }
 
     const [room] = await db.select().from(rooms).where(eq(rooms.code, code));
 
     if (!room) {
-      return new Response(JSON.stringify({ error: 'Room not found' }), { status: 404 });
+      return new Response(JSON.stringify({ error: "Room not found" }), {
+        status: 404,
+      });
     }
 
     const roomPlayers = await db
@@ -51,29 +55,32 @@ export const GET: APIRoute = async ({ params }) => {
           name: p.name,
           isCreator: p.isCreator,
           role: p.role,
-          card: card ? {
-            id: card.id,
-            name: card.name,
-            uri: card.uri,
-            subtype: card.subtype,
-            type: card.type,
-            text: card.text,
-            flavor: card.flavor,
-            artist: card.artist,
-            rarity: card.rarity,
-            cost: card.cost,
-            color: card.color,
-          } : null,
+          card: card
+            ? {
+                id: card.id,
+                name: card.name,
+                uri: card.uri,
+                subtype: card.subtype,
+                type: card.type,
+                text: card.text,
+                flavor: card.flavor,
+                artist: card.artist,
+                rarity: card.rarity,
+                cost: card.cost,
+                color: card.color,
+              }
+            : null,
         };
-      })
+      }),
     );
 
-    const shouldRevealRoles = room.gamePhase === 'started' || room.status === 'started';
+    const shouldRevealRoles =
+      room.gamePhase === "started" || room.status === "started";
 
     const response: Record<string, any> = {
       status: room.status,
       gamePhase: room.gamePhase,
-      players: playersWithCards.map(p => ({
+      players: playersWithCards.map((p) => ({
         id: p.id,
         name: p.name,
         isCreator: p.isCreator,
@@ -84,9 +91,11 @@ export const GET: APIRoute = async ({ params }) => {
 
     return new Response(JSON.stringify(response), {
       status: 200,
-      headers: { 'Content-Type': 'application/json' }
+      headers: { "Content-Type": "application/json" },
     });
   } catch (error: any) {
-    return new Response(JSON.stringify({ error: error.message }), { status: 500 });
+    return new Response(JSON.stringify({ error: error.message }), {
+      status: 500,
+    });
   }
 };

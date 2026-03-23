@@ -110,9 +110,7 @@
         "cards_name_anchor_unique": {
           "name": "cards_name_anchor_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "name_anchor"
-          ]
+          "columns": ["name_anchor"]
         }
       },
       "policies": {},
@@ -155,12 +153,8 @@
           "name": "player_cards_player_id_players_id_fk",
           "tableFrom": "player_cards",
           "tableTo": "players",
-          "columnsFrom": [
-            "player_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["player_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -168,12 +162,8 @@
           "name": "player_cards_card_id_cards_id_fk",
           "tableFrom": "player_cards",
           "tableTo": "cards",
-          "columnsFrom": [
-            "card_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["card_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -233,12 +223,8 @@
           "name": "players_room_id_rooms_id_fk",
           "tableFrom": "players",
           "tableTo": "rooms",
-          "columnsFrom": [
-            "room_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["room_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -294,9 +280,7 @@
         "rooms_code_unique": {
           "name": "rooms_code_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "code"
-          ]
+          "columns": ["code"]
         }
       },
       "policies": {},
@@ -332,12 +316,8 @@
           "name": "rulings_card_id_cards_id_fk",
           "tableFrom": "rulings",
           "tableTo": "cards",
-          "columnsFrom": [
-            "card_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["card_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
