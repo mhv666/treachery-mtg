@@ -111,7 +111,7 @@ export default function GameLobbyGrid() {
               <h2 className="text-2xl font-bold">Host a New Game</h2>
             </div>
             <p className="text-slate-600 dark:text-slate-400 mb-8 relative z-10">
-              Ready to lead? Create a lobby and invite your friends. As the Monarch, you'll control the setup.
+              Ready to lead? Create a lobby and invite your friends. As the Monarch, you&apos;ll control the setup.
             </p>
             <form onSubmit={handleCreate} className="space-y-6 mt-auto relative z-10">
               <div>

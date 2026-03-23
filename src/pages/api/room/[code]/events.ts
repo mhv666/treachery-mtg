@@ -112,7 +112,7 @@ export const GET: APIRoute = async ({ params, request }) => {
       request.signal.addEventListener('abort', () => {
         gameEvents.off('roomUpdated', handleUpdate);
         clearInterval(interval);
-        try { controller.close(); } catch (e) {}
+        try { controller.close(); } catch { /* stream already closed */ }
       });
     }
   });
