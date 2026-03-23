@@ -3,6 +3,7 @@ import { db } from "../../db";
 import { rooms, players } from "../../db/schema";
 import { gameEvents } from "../../lib/events";
 import { startGameSchema } from "../../lib/validation";
+import { assignRoles, MIN_PLAYERS, MAX_PLAYERS } from "../../lib/game";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 
@@ -41,18 +42,18 @@ export const POST: APIRoute = async ({ request }) => {
       .from(players)
       .where(eq(players.roomId, room.id));
 
-    if (roomPlayers.length !== 5) {
+    const playerCount = roomPlayers.length;
+
+    if (playerCount < MIN_PLAYERS || playerCount > MAX_PLAYERS) {
       return new Response(
-        JSON.stringify({ error: "Need exactly 5 players to start" }),
+        JSON.stringify({
+          error: `Need between ${MIN_PLAYERS} and ${MAX_PLAYERS} players to start`,
+        }),
         { status: 400 },
       );
     }
 
-    const roles = ["Leader", "Assassin", "Assassin", "Traitor", "Guardian"];
-    for (let i = roles.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [roles[i], roles[j]] = [roles[j], roles[i]];
-    }
+    const roles = assignRoles(playerCount);
 
     await db.transaction(async (tx) => {
       await tx
@@ -60,7 +61,7 @@ export const POST: APIRoute = async ({ request }) => {
         .set({ status: "started" })
         .where(eq(rooms.id, room.id));
 
-      for (let i = 0; i < 5; i++) {
+      for (let i = 0; i < playerCount; i++) {
         await tx
           .update(players)
           .set({ role: roles[i] })
