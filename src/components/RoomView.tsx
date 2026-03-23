@@ -180,6 +180,7 @@ export default function RoomView({ roomCode }: { roomCode: string }) {
                   className="w-48 h-64 object-cover rounded-lg mx-auto shadow-2xl"
                 />
                 <p className="text-sm text-muted-foreground mt-2">{card.name}</p>
+                <p className="text-xs text-muted-foreground mt-2 italic px-4">{card.text}</p>
               </div>
             )}
           </CardContent>
