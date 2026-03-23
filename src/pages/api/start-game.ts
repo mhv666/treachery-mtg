@@ -2,21 +2,16 @@ import type { APIRoute } from "astro";
 import { db } from "../../db";
 import { rooms, players } from "../../db/schema";
 import { gameEvents } from "../../lib/events";
+import { startGameSchema } from "../../lib/validation";
 import { eq } from "drizzle-orm";
+import { z } from "zod";
 
 export const POST: APIRoute = async ({ request }) => {
   try {
     const data = await request.json();
-    const { code, playerId } = data;
+    const { code, playerId } = startGameSchema.parse(data);
 
-    if (!code || !playerId) {
-      return new Response(
-        JSON.stringify({ error: "Room code and player ID are required" }),
-        { status: 400 },
-      );
-    }
-
-    const roomCode = code.toUpperCase();
+    const roomCode = code;
 
     const [room] = await db
       .select()
@@ -80,6 +75,12 @@ export const POST: APIRoute = async ({ request }) => {
       headers: { "Content-Type": "application/json" },
     });
   } catch (error: any) {
+    if (error instanceof z.ZodError) {
+      return new Response(JSON.stringify({ error: error.issues }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
     return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
     });

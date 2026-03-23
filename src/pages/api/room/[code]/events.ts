@@ -2,13 +2,22 @@ import type { APIRoute } from "astro";
 import { db } from "../../../../db";
 import { rooms, players, cards, playerCards } from "../../../../db/schema";
 import { gameEvents } from "../../../../lib/events";
+import { roomCodeSchema } from "../../../../lib/validation";
 import { eq } from "drizzle-orm";
+import { z } from "zod";
 
 export const GET: APIRoute = async ({ params, request }) => {
-  const code = params.code?.toUpperCase();
-
-  if (!code) {
-    return new Response("Room code is required", { status: 400 });
+  let code: string;
+  try {
+    code = roomCodeSchema.parse(params.code?.toUpperCase());
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return new Response(JSON.stringify({ error: error.issues }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+    throw error;
   }
 
   const stream = new ReadableStream({

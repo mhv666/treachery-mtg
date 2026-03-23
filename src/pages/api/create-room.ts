@@ -2,19 +2,13 @@ import type { APIRoute } from "astro";
 import { db } from "../../db";
 import { rooms, players } from "../../db/schema";
 import { gameEvents } from "../../lib/events";
-import { eq } from "drizzle-orm";
+import { createRoomSchema } from "../../lib/validation";
+import { z } from "zod";
 
 export const POST: APIRoute = async ({ request }) => {
   try {
     const data = await request.json();
-    const playerName = data.playerName;
-
-    if (!playerName) {
-      return new Response(
-        JSON.stringify({ error: "Player name is required" }),
-        { status: 400 },
-      );
-    }
+    const { playerName } = createRoomSchema.parse(data);
 
     const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     let code = "";
@@ -39,6 +33,12 @@ export const POST: APIRoute = async ({ request }) => {
       headers: { "Content-Type": "application/json" },
     });
   } catch (error: any) {
+    if (error instanceof z.ZodError) {
+      return new Response(JSON.stringify({ error: error.issues }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
     return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
     });

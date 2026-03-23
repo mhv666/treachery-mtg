@@ -1,17 +1,13 @@
 import type { APIRoute } from "astro";
 import { db } from "../../../db";
 import { rooms, players, cards, playerCards } from "../../../db/schema";
+import { roomCodeSchema } from "../../../lib/validation";
 import { eq } from "drizzle-orm";
+import { z } from "zod";
 
 export const GET: APIRoute = async ({ params }) => {
   try {
-    const code = params.code?.toUpperCase();
-
-    if (!code) {
-      return new Response(JSON.stringify({ error: "Room code is required" }), {
-        status: 400,
-      });
-    }
+    const code = roomCodeSchema.parse(params.code?.toUpperCase());
 
     const [room] = await db.select().from(rooms).where(eq(rooms.code, code));
 
@@ -94,6 +90,12 @@ export const GET: APIRoute = async ({ params }) => {
       headers: { "Content-Type": "application/json" },
     });
   } catch (error: any) {
+    if (error instanceof z.ZodError) {
+      return new Response(JSON.stringify({ error: error.issues }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
     return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
     });

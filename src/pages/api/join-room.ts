@@ -2,26 +2,16 @@ import type { APIRoute } from "astro";
 import { db } from "../../db";
 import { rooms, players } from "../../db/schema";
 import { gameEvents } from "../../lib/events";
+import { joinRoomSchema } from "../../lib/validation";
 import { eq, sql, count } from "drizzle-orm";
+import { z } from "zod";
 
 export const POST: APIRoute = async ({ request }) => {
   try {
     const data = await request.json();
-    const { code, playerName } = data;
+    const { code, playerName } = joinRoomSchema.parse(data);
 
-    if (!code || !playerName) {
-      return new Response(
-        JSON.stringify({ error: "Room code and player name are required" }),
-        { status: 400 },
-      );
-    }
-
-    const roomCode = code.toUpperCase();
-
-    const [room] = await db
-      .select()
-      .from(rooms)
-      .where(eq(rooms.code, roomCode));
+    const [room] = await db.select().from(rooms).where(eq(rooms.code, code));
 
     if (!room) {
       return new Response(JSON.stringify({ error: "Room not found" }), {
@@ -68,22 +58,26 @@ export const POST: APIRoute = async ({ request }) => {
     }
 
     const playerId = crypto.randomUUID();
-    await db
-      .insert(players)
-      .values({
-        id: playerId,
-        roomId: room.id,
-        name: playerName,
-        isCreator: false,
-      });
+    await db.insert(players).values({
+      id: playerId,
+      roomId: room.id,
+      name: playerName,
+      isCreator: false,
+    });
 
-    gameEvents.emit("roomUpdated", roomCode);
+    gameEvents.emit("roomUpdated", code);
 
-    return new Response(JSON.stringify({ code: roomCode, playerId }), {
+    return new Response(JSON.stringify({ code, playerId }), {
       status: 200,
       headers: { "Content-Type": "application/json" },
     });
   } catch (error: any) {
+    if (error instanceof z.ZodError) {
+      return new Response(JSON.stringify({ error: error.issues }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
     return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
     });
